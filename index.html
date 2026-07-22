@@ -238,6 +238,29 @@
   .tree-sub{font-size:11px;color:var(--soft);font-weight:300}
   .treesvg{width:100%;height:auto;max-height:200px;display:block}
 
+  .tbl-panel{margin-top:20px;border:1px solid var(--line);border-radius:12px;
+    background:linear-gradient(180deg,var(--panel),#0A1210);padding:16px 18px 18px}
+  .tbl-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+  .tbl-title{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .tbl-sub{font-size:11px;color:var(--soft);font-weight:300}
+  .tbl-scroll{overflow-x:auto}
+  table.log{border-collapse:collapse;width:100%;font-size:10.5px;font-weight:300;min-width:940px}
+  table.log th{text-align:left;font-weight:500;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--faint);padding:0 9px 7px;border-bottom:1px solid var(--line-2);white-space:nowrap;vertical-align:bottom}
+  table.log td{padding:7px 9px;border-bottom:1px dashed var(--line-2);color:var(--soft);vertical-align:top;line-height:1.45}
+  table.log tr:last-child td{border-bottom:none}
+  table.log .c-n{color:var(--ink);font-weight:500;white-space:nowrap}
+  table.log .c-want{color:#d8cfbd}
+  table.log .c-sens{color:#7fbfa6;white-space:nowrap}
+  table.log .c-serv{color:#7fabd0;white-space:nowrap}
+  table.log .c-pri{color:#a99ad6}
+  table.log .c-ges{color:#c9a86e}
+  table.log .c-cam,table.log .c-say{color:#9fb0c2;white-space:nowrap}
+  table.log th.c-res,table.log td.c-res{border-left:2px solid rgba(242,184,76,.45);
+    background:rgba(242,184,76,.05);color:var(--amber);font-weight:500;text-align:center;white-space:nowrap}
+  table.log th.c-res{color:#e0a94e}
+  table.log tr.pert td:first-child{box-shadow:inset 3px 0 0 rgba(240,96,74,.55)}
+  table.log .empty td{color:var(--faint);text-align:center;padding:18px 0;border-bottom:none}
   .note{margin-top:20px;display:flex;align-items:center;gap:10px;font-size:10.5px;letter-spacing:.06em;color:var(--faint);flex-wrap:wrap}
   .note .dot{width:5px;height:5px;border-radius:50%;background:var(--faint)}
   .schematic{border:1px dashed var(--line);border-radius:6px;padding:5px 10px;color:var(--soft);text-transform:uppercase;letter-spacing:.14em;font-size:9.5px}
@@ -354,6 +377,23 @@
     </svg>
   </div>
 
+  <div class="tbl-panel">
+    <div class="tbl-head">
+      <span class="tbl-title" data-i18n="tblTitle"></span>
+      <span class="tbl-sub" id="tblSub"></span>
+    </div>
+    <div class="tbl-scroll">
+      <table class="log">
+        <thead><tr>
+          <th data-i18n="thN"></th><th data-i18n="thWant"></th><th data-i18n="thSens"></th>
+          <th data-i18n="thServ"></th><th data-i18n="thPri"></th><th data-i18n="thGes"></th>
+          <th data-i18n="thCam"></th><th data-i18n="thSay"></th><th class="c-res" data-i18n="thRes"></th>
+        </tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="note">
     <span class="dot"></span>
     <span class="schematic" data-i18n="schematic"></span>
@@ -430,17 +470,20 @@ function retranslate(){
 const PRIMS={
   empujar:{label:B("empujar","push"),musc:B("pectoral mayor","pectoralis major"),
     musc2:B("deltoides anterior","anterior deltoid"),sub:B("extender la muñeca","extending the wrist"),
-    otra:B("traccionar","pull"),otraKey:"traccionar",ger:B("empuja","pushes"),
-    opts:[{n:B("alcance frontal","frontal reach"),hold:false,task:B("alcanzar el pulsador","reach the button")},
-          {n:B("transporte adelante","forward transport"),hold:true,task:B("llevar el huevo a la marca","move the egg to the mark")},
-          {n:B("empuje sostenido","sustained push"),hold:false,task:B("mantener la puerta abierta","hold the door open")}]},
+    otra:B("traccionar","pull"),otraKey:"traccionar",ger:B("empuja","pushes")},
   traccionar:{label:B("traccionar","pull"),musc:B("dorsal ancho","latissimus dorsi"),
     musc2:B("deltoides posterior","posterior deltoid"),sub:B("orientar la muñeca","orienting the wrist"),
-    otra:B("empujar","push"),otraKey:"empujar",ger:B("tracciona","pulls"),
-    opts:[{n:B("aproximación al cuerpo","approach to the body"),hold:true,task:B("traer el huevo hacia ti","bring the egg towards you")},
-          {n:B("arrastre horizontal","horizontal drag"),hold:true,task:B("arrastrar la caja hasta el borde","drag the box to the edge")},
-          {n:B("tracción sostenida","sustained pull"),hold:false,task:B("sostener la cinta tensa","keep the strap taut")}]}
+    otra:B("empujar","push"),otraKey:"empujar",ger:B("tracciona","pulls")}
 };
+/* tres intenciones declarables, todas sobre el mismo objeto */
+const TASKS=[
+  {key:"empujar",dir:"push",holds:false,task:B("empujar la pelota","push the ball"),
+   opts:[B("empuje rasante","low push"),B("empuje con extensión de codo","push with elbow extension"),B("empuje sostenido","sustained push")]},
+  {key:"empujar",dir:"lift",holds:true,task:B("levantar la pelota","lift the ball"),
+   opts:[B("elevación frontal","frontal elevation"),B("elevación con codo flexionado","elevation with flexed elbow"),B("elevación lateral","lateral elevation")]},
+  {key:"traccionar",dir:"pull",holds:true,task:B("traccionar la pelota","pull the ball"),
+   opts:[B("tracción al cuerpo","pull to the body"),B("arrastre sobre la mesa","drag across the table"),B("tracción sostenida","sustained pull")]}
+];
 const PKEYS=Object.keys(PRIMS);          // la prensión queda fuera del sorteo inicial
 const GROUPS=B("pectoral · dorsal · deltoides · lumbar","pectoralis · latissimus · deltoid · lumbar");
 const LETTERS="ABCDEFGHIJKLMNOPQR";
@@ -452,10 +495,10 @@ function updateSessionUI(){
   goalTxt.textContent="«"+tx(session.task)+"»";
 }
 function pickExample(){
-  const prev=session?session.key:null;
-  const pool=PKEYS.filter(k=>k!==prev);
-  const k=pool[rnd(0,pool.length-1)],prim=PRIMS[k],goal=rnd(0,2);
-  session={key:k,prim,goal,holds:prim.opts[goal].hold,task:prim.opts[goal].task};
+  const prev=session?session.tIdx:-1;
+  const pool=TASKS.map((_,i)=>i).filter(i=>i!==prev);
+  const tIdx=pool[rnd(0,pool.length-1)],t=TASKS[tIdx];
+  session={tIdx,key:t.key,prim:PRIMS[t.key],dir:t.dir,goal:rnd(0,2),holds:t.holds,task:t.task,opts:t.opts};
   updateSessionUI();
 }
 function newSession(){session=null;pickExample();}
@@ -646,22 +689,25 @@ function buildCamera(){
   const t=el("text",{x:18,y:53,fill:"#8a6a2e","font-size":6,"font-family":FONT,"letter-spacing":"1"},s);t.textContent="REC ●";
   return s;
 }
-function buildGesture(key,holds){
+function buildGesture(key,holds){  // key: push | pull | lift
   const s=mini();
-  el("ellipse",{cx:32,cy:31,rx:9,ry:12,fill:"#F6E4C7",stroke:C.amber,"stroke-width":1.4},s);
-  el("ellipse",{cx:28.5,cy:26,rx:2.6,ry:4.4,fill:"#fff",opacity:.5},s);
+  el("circle",{cx:32,cy:31,r:10,fill:"#F6E4C7",stroke:C.amber,"stroke-width":1.4},s);
+  el("ellipse",{cx:28,cy:26,rx:2.6,ry:3.6,fill:"#fff",opacity:.5},s);
   el("rect",{x:9,y:24,width:5.5,height:13,rx:2.4,fill:C.amber},s);
   el("rect",{x:49.5,y:24,width:5.5,height:13,rx:2.4,fill:C.amber},s);
   if(holds){
     el("path",{d:"M 15 31 q 3 -5 0 -9",fill:"none",stroke:C.amber,"stroke-width":1.2,opacity:.6},s);
     el("path",{d:"M 49 31 q -3 -5 0 -9",fill:"none",stroke:C.amber,"stroke-width":1.2,opacity:.6},s);
   }
-  if(key==="empujar"){
+  if(key==="push"){
     el("line",{x1:22,y1:49,x2:41,y2:49,stroke:C.amber,"stroke-width":1.4,opacity:.85},s);
     el("path",{d:"M 38 46 L 43 49 L 38 52 Z",fill:C.amber,opacity:.85},s);
-  }else{
+  }else if(key==="pull"){
     el("line",{x1:23,y1:49,x2:42,y2:49,stroke:C.amber,"stroke-width":1.4,opacity:.85},s);
     el("path",{d:"M 26 46 L 21 49 L 26 52 Z",fill:C.amber,opacity:.85},s);
+  }else{
+    el("line",{x1:32,y1:56,x2:32,y2:44,stroke:C.amber,"stroke-width":1.4,opacity:.85},s);
+    el("path",{d:"M 29 47 L 32 42 L 35 47 Z",fill:C.amber,opacity:.85},s);
   }
   el("path",{d:"M 44 55 l 2.6 2.6 l 5.4 -6",fill:"none",stroke:C.amber,"stroke-width":2,"stroke-linecap":"round","stroke-linejoin":"round"},s);
   return s;
@@ -850,7 +896,9 @@ function pulseRow(track,alarm){
 function treeStep(d){
   return{label:"ruta registrada",narr:null,dur:120,mount:async()=>{
     strat.push({n:d.n,pert:d.pert});trimWindow();redrawTree();updateStatus();
+    addLogRow(d);logRows[logRows.length-1]._n=d.n;
   },undo:()=>{
+    removeLogRow(d.n);
     const i=strat.findIndex(s=>s.n===d.n);
     if(i>=0)strat.splice(i,1);
     redrawTree();updateStatus();
@@ -860,7 +908,7 @@ function buildSteps(d){
   const SS=d.ex, M=d.prim, steps=[];
   const PL=l=>M.label[l], MU=l=>M.musc[l], MU2=l=>M.musc2[l], SB=l=>M.sub[l],
         OT=l=>M.otra[l], MUO=l=>PRIMS[M.otraKey].musc[l], GE=l=>M.ger[l], TK=l=>SS.task[l],
-        ON=(i,l)=>M.opts[i].n[l], GR=l=>GROUPS[l];
+        ON=(i,l)=>SS.opts[i][l], GR=l=>GROUPS[l];
   const sv=v=>`A/B/C ${v[0].ang}°, ${v[1].ang}°, ${v[2].ang}° (${v[0].pow}/${v[1].pow}/${v[2].pow}%)`;
   const ES=l=>l==="es";
 
@@ -952,8 +1000,8 @@ function buildSteps(d){
 
     steps.push({label:mk(l=>ES(l)?"prior biomecánico":"biomechanical prior"),
       narr:mk(l=>ES(l)
-        ? `<span class="vi">prior biomecánico</span> — mientras se <b>${GE("es")}</b>, el espacio de gestos posibles no es el repertorio entero: quedan <b>3 vías</b> — ${M.opts.map(o=>"«"+o.n.es+"»").join(" · ")}.`
-        : `<span class="vi">biomechanical prior</span> — while the arm <b>${GE("en")}</b>, the space of possible gestures is not the whole repertoire: <b>3 routes</b> remain — ${M.opts.map(o=>'"'+o.n.en+'"').join(" · ")}.`),
+        ? `<span class="vi">prior biomecánico</span> — mientras se <b>${GE("es")}</b>, el espacio de gestos posibles no es el repertorio entero: quedan <b>3 vías</b> — ${SS.opts.map(o=>"«"+o.es+"»").join(" · ")}.`
+        : `<span class="vi">biomechanical prior</span> — while the arm <b>${GE("en")}</b>, the space of possible gestures is not the whole repertoire: <b>3 routes</b> remain — ${SS.opts.map(o=>'"'+o.en+'"').join(" · ")}.`),
       dur:DWELL,mount:async ctx=>{
         const track=getTrack(),svg=buildPrior(d,0);
         ctx.add(track,conn(false));
@@ -1081,7 +1129,7 @@ function buildSteps(d){
       mk(l=>ES(l)
         ? `<span class="va">resultado</span> — <b>«${TK("es")}» ✓</b>${SS.holds?", con la carga sostenida":""}. Esto es lo único que tiene que mantenerse igual entre días.`
         : `<span class="va">outcome</span> — <b>"${TK("en")}" ✓</b>${SS.holds?", with the load held":""}. This is the only thing that has to stay the same across days.`),
-      ()=>({track:S.r1.track,node:buildGesture(SS.key,SS.holds),cap:mk(l=>ES(l)?"resultado ✓":"outcome ✓"),accent:"a",opts:{zone:"oos"}}));
+      ()=>({track:S.r1.track,node:buildGesture(SS.dir,SS.holds),cap:mk(l=>ES(l)?"resultado ✓":"outcome ✓"),accent:"a",opts:{zone:"oos"}}));
     steps.push({label:mk(l=>ES(l)?"aferencia · cámara → sujeto":"afference · camera → subject"),
       narr:mk(l=>ES(l)
         ? `<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual: lenta, y <b>obliga a mirar</b>.`
@@ -1145,7 +1193,7 @@ function buildSteps(d){
       mk(l=>ES(l)
         ? `<span class="va">resultado</span> — <b>«${TK("es")}» ✓</b>: el mismo resultado, alcanzado con otro reclutamiento y otros ángulos.`
         : `<span class="va">outcome</span> — <b>"${TK("en")}" ✓</b>: the same outcome, reached with different recruitment and different angles.`),
-      ()=>({track:S.r2.track,node:buildGesture(SS.key,SS.holds),cap:mk(l=>ES(l)?"resultado ✓ · adaptado":"outcome ✓ · adapted"),accent:"a",opts:{zone:"oos"}}));
+      ()=>({track:S.r2.track,node:buildGesture(SS.dir,SS.holds),cap:mk(l=>ES(l)?"resultado ✓ · adaptado":"outcome ✓ · adapted"),accent:"a",opts:{zone:"oos"}}));
     steps.push({label:mk(l=>ES(l)?"aferencia · cámara → sujeto":"afference · camera → subject"),
       narr:mk(l=>ES(l)?`<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual.`
                       :`<span class="va">camera afference</span> — the outcome returns to the subject visually.`),
@@ -1317,6 +1365,13 @@ const D={
               "— click a row to re-read it · drag the bottom edge to resize —"),
   treeTitle:B("Estrategias · una rama por tirada · las perturbadas se bifurcan",
               "Strategies · one branch per trial · perturbed ones fork"),
+  tblTitle:B("La tabla · una fila por tirada","The table · one row per trial"),
+  thN:B("tirada","trial"), thWant:B("el usuario quiere","the user wants"),
+  thSens:B("sensores","sensors"), thServ:B("servos","servos"), thPri:B("priores","priors"),
+  thGes:B("gesto","gesture"), thCam:B("la cámara dice","the camera says"),
+  thSay:B("el usuario dice","the user says"), thRes:B("resultado","outcome"),
+  tblEmpty:B("— sin tiradas todavía —","— no trials yet —"),
+  camOK:B("conseguido","achieved"), sayOK:B("sí","yes"),
   schematic:B("animación conceptual · no son datos reales","conceptual animation · not real data")
 };
 function applyI18n(){
@@ -1339,7 +1394,55 @@ function setLang(l){
   updateStatus();
   updateStepUI();
   redrawTree();
+  updateTblSub();
   syncZoneBar();
+}
+
+/* ---------- la tabla ---------- */
+const logBody=$("#logBody"),tblSub=$("#tblSub");
+function updateTblSub(){
+  const n=logRows.length,ok=logRows.length;
+  tblSub.textContent=n
+    ?(LANG==="es"?`${n} tirada(s) · ${ok} ✓ · la ruta cambia, la última columna no`
+                 :`${n} trial(s) · ${ok} ✓ · the route changes, the last column does not`)
+    :(LANG==="es"?"la última columna es la que tiene que mantenerse":"the last column is the one that must hold");
+}
+const logRows=[];
+function emptyTable(){
+  logBody.innerHTML="";
+  const tr=document.createElement("tr");tr.className="empty";
+  const td=document.createElement("td");td.setAttribute("colspan","9");
+  tr.appendChild(reg(td,()=>tx(D.tblEmpty)));logBody.appendChild(tr);
+}
+function addLogRow(d){
+  const e=logBody.querySelector(".empty");if(e)e.remove();
+  const p=d.pert?d.p2:d.p1;
+  const sens=d.pert?()=>sensLetters(d.p1.sensors)+" → "+sensLetters(d.p2.sensors):()=>sensLetters(p.sensors);
+  const serv=`${p.servos[0].ang}° ${p.servos[1].ang}° ${p.servos[2].ang}°`;
+  const tr=document.createElement("tr");
+  if(d.pert)tr.className="pert";
+  const cells=[
+    ["c-n",()=>"#"+String(d.n).padStart(2,"0")+(d.pert?(LANG==="es"?" ·perturbada":" ·perturbed"):"")],
+    ["c-want",()=>"«"+d.ex.task[LANG]+"»"],
+    ["c-sens",sens],
+    ["c-serv",()=>serv],
+    ["c-pri",()=>"«"+d.ex.opts[d.goal][LANG]+"» +"+CYCLES+(LANG==="es"?" eslabones":" links")],
+    ["c-ges",()=>"«"+d.ex.task[LANG]+"» ✓"],
+    ["c-cam",()=>tx(D.camOK)],
+    ["c-say",()=>tx(D.sayOK)],
+    ["c-res",()=>"✓"]
+  ];
+  cells.forEach(([cls,f])=>{const td=document.createElement("td");td.className=cls;tr.appendChild(reg(td,f));});
+  logBody.appendChild(tr);
+  logRows.push(tr);
+  while(logRows.length>WINDOW){const old=logRows.shift();if(old.parentNode)old.remove();}
+  updateTblSub();
+}
+function removeLogRow(n){
+  const idx=logRows.findIndex(r=>r._n===n);
+  if(idx>=0){const r=logRows.splice(idx,1)[0];if(r.parentNode)r.remove();}
+  if(!logRows.length)emptyTable();
+  updateTblSub();
 }
 
 /* ---------- flujo ---------- */
@@ -1406,7 +1509,7 @@ function reset(){
   ledger.appendChild(bar);
   ledger.appendChild(reg(div("hint"),()=>LANG==="es"?"Pulsa «nueva interacción» para imprimir la primera fila.":"Press \u201cnew interaction\u201d to print the first row."));
   emptyConsole();
-  newSession();redrawTree();updateStatus();updateStepUI();syncZoneBar();
+  logRows.length=0;emptyTable();newSession();redrawTree();updateStatus();updateStepUI();syncZoneBar();
 }
 
 btnNew.addEventListener("click",()=>stamp(perturb));
@@ -1437,6 +1540,7 @@ spd.addEventListener("input",()=>{
 
 document.documentElement.style.setProperty("--spd",speed);
 applyI18n();
+emptyTable();
 reg($("#hint0"),()=>LANG==="es"?"Pulsa «nueva interacción» para imprimir la primera fila.":"Press \u201cnew interaction\u201d to print the first row.");
 setMode(false);
 setStepMode(chkStep.checked);
