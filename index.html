@@ -38,6 +38,11 @@
   .led.oos{background:var(--red);box-shadow:0 0 9px var(--red)}
   .status b{color:var(--ink);font-weight:500}
   .status .sc{font-size:9.5px;letter-spacing:.12em;color:var(--faint);line-height:1.6}
+  .langsw{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-bottom:11px}
+  .langsw button{border:none;border-radius:0;padding:5px 11px;font-size:10px;letter-spacing:.16em;
+    text-transform:uppercase;background:transparent;color:var(--faint);gap:0}
+  .langsw button:hover:not(:disabled){background:rgba(255,255,255,.03);color:var(--soft)}
+  .langsw button.on{background:rgba(53,226,158,.09);color:#9fd9c0}
   .status .goal{color:var(--amber);font-weight:500;letter-spacing:.04em;text-transform:none;font-size:11px}
 
   /* conceptual banner */
@@ -266,33 +271,35 @@
 <div class="wrap">
   <header class="head">
     <div>
-      <div class="eyebrow">animación conceptual · lazo de control</div>
-      <h1>Registro de interacciones<br><em>la ruta cambia, el resultado no</em></h1>
+      <div class="langsw" role="group" aria-label="idioma / language">
+        <button id="langEs" class="on">es</button><button id="langEn">en</button>
+      </div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n-html="title"></h1>
     </div>
     <div class="status" aria-live="polite">
-      <div class="row1"><span class="led" id="led"></span><b id="modeTxt">modo nominal</b></div>
-      <span class="sc">primitiva: <b id="primTxt">—</b></span>
-      <span class="sc">objetivo de esta tirada<br><span class="goal" id="goalTxt">—</span></span>
+      <div class="row1"><span class="led" id="led"></span><b id="modeTxt"></b></div>
+      <span class="sc"><span data-i18n="stPrim"></span> <b id="primTxt">—</b></span>
+      <span class="sc"><span data-i18n="stGoal"></span><br><span class="goal" id="goalTxt">—</span></span>
     </div>
   </header>
 
   <div class="banner">
     <span class="bi">▲</span>
-    <span class="bt"><b>Animación conceptual — no son datos reales.</b><br>
-      Ilustra el mecanismo propuesto (primitiva → prior biomecánico → afinado por el listener → convergencia por retroalimentación de los servos). Los sensores, ángulos y potencias que aparecen se generan para la demostración y no proceden de ningún registro experimental.</span>
+    <span class="bt" data-i18n-html="banner"></span>
   </div>
 
   <div class="controls">
-    <button class="primary" id="btnNew"><span class="arm"></span>nueva interacción</button>
+    <button class="primary" id="btnNew"><span class="arm"></span><span data-i18n="btnNew"></span></button>
     <label class="switch" id="sw">
       <input type="checkbox" id="chkPert">
       <span class="track-sw"><span class="knob"></span></span>
-      <span class="lab">perturbación<small>cambio externo súbito</small></span>
+      <span class="lab"><span data-i18n="swPert"></span><small data-i18n="swPertSub"></small></span>
     </label>
     <label class="switch step on" id="swStep">
       <input type="checkbox" id="chkStep" checked>
       <span class="track-sw"><span class="knob"></span></span>
-      <span class="lab">paso a paso<small id="stepModeTxt">avance manual · activado</small></span>
+      <span class="lab"><span data-i18n="swStep"></span><small id="stepModeTxt"></small></span>
     </label>
     <span class="navgrp" id="navgrp">
       <button class="nav" id="btnPrev" title="elemento anterior (←)">◀</button>
@@ -301,45 +308,45 @@
     </span>
     <span class="spacer"></span>
     <div class="speed">
-      <span class="sp-lab">lento</span>
+      <span class="sp-lab" data-i18n="slow"></span>
       <input type="range" id="spd" min="0.3" max="2" step="0.05" value="0.45" aria-label="velocidad de animación de cada elemento">
-      <span class="sp-lab">rápido</span>
+      <span class="sp-lab" data-i18n="fast"></span>
       <span class="sp-val" id="spdVal">0.45×</span>
     </div>
-    <button class="ghost" id="btnReset">reiniciar</button>
-    <span class="count"><b id="cIter">0</b> interacciones<br><b id="cOos">0</b> cambios externos</span>
+    <button class="ghost" id="btnReset" data-i18n="btnReset"></button>
+    <span class="count"><b id="cIter">0</b> <span data-i18n="cIter"></span><br><b id="cOos">0</b> <span data-i18n="cOos"></span></span>
   </div>
 
   <div class="legend">
-    <span class="lg"><span class="chip u"></span>sujeto (intención declarada · confirmación)</span>
-    <span class="lg"><span class="chip g"></span>① malla</span>
-    <span class="lg"><span class="chip b"></span>② activación</span>
-    <span class="lg"><span class="chip i"></span>primitiva · prior biomecánico · red generadora (×N)</span>
-    <span class="lg"><span class="chip b"></span>servos (arrancan y corrigen)</span>
-    <span class="lg"><span class="chip l"></span>listener (engloba, escucha el retorno y afina el prior)</span>
-    <span class="lg"><span class="chip r"></span>⚡ cambio externo súbito</span>
-    <span class="lg"><span class="chip a"></span>cámaras · resultado · capa de lenguaje</span>
+    <span class="lg"><span class="chip u"></span><span data-i18n="lg1"></span></span>
+    <span class="lg"><span class="chip g"></span><span data-i18n="lg2"></span></span>
+    <span class="lg"><span class="chip b"></span><span data-i18n="lg3"></span></span>
+    <span class="lg"><span class="chip i"></span><span data-i18n="lg4"></span></span>
+    <span class="lg"><span class="chip b"></span><span data-i18n="lg5"></span></span>
+    <span class="lg"><span class="chip l"></span><span data-i18n="lg6"></span></span>
+    <span class="lg"><span class="chip r"></span><span data-i18n="lg7"></span></span>
+    <span class="lg"><span class="chip a"></span><span data-i18n="lg8"></span></span>
   </div>
 
   <div class="ledger-wrap">
-    <div class="ledger-head"><span>tira impresa · lo más reciente abajo · clic = historia</span><span>— ventana de 6 —</span></div>
+    <div class="ledger-head"><span data-i18n="ledgerHead"></span><span data-i18n="window6"></span></div>
     <div class="ledger" id="ledger">
       <div class="zonebar" id="zonebar">
-        <span class="zb zb-is" id="zbIs">in sample<small>lo que el decodificador ve y manipula</small></span>
-        <span class="zb zb-oos">out of sample<small>lo que nunca ve · verificación independiente</small></span>
+        <span class="zb zb-is" id="zbIs"><span data-i18n="zbIsT"></span><small data-i18n="zbIs"></small></span>
+        <span class="zb zb-oos"><span data-i18n="zbOosT"></span><small data-i18n="zbOos"></small></span>
       </div>
-      <div class="hint">Pulsa «nueva interacción» para imprimir la primera fila.</div>
+      <div class="hint" id="hint0"></div>
     </div>
   </div>
 
   <div class="console">
-    <div class="console-head"><span>historia de la interacción</span><span>— clic en una fila para releerla · arrastra el borde inferior para ajustar —</span></div>
+    <div class="console-head"><span data-i18n="storyHead"></span><span data-i18n="storyHint"></span></div>
     <div class="console-body" id="consoleBody"><span class="cempty">Sin historia todavía.</span></div>
   </div>
 
   <div class="tree-panel">
     <div class="tree-head">
-      <span class="tree-title">Estrategias · una rama por tirada · las perturbadas se bifurcan</span>
+      <span class="tree-title" data-i18n="treeTitle"></span>
       <span class="tree-sub" id="treeSub">sin rutas todavía</span>
     </div>
     <svg class="treesvg" id="treesvg" viewBox="0 0 520 170" preserveAspectRatio="xMidYMid meet">
@@ -349,7 +356,7 @@
 
   <div class="note">
     <span class="dot"></span>
-    <span class="schematic">animación conceptual · no son datos reales</span>
+    <span class="schematic" data-i18n="schematic"></span>
   </div>
 </div>
 
@@ -401,28 +408,48 @@ function syncZoneBar(){
 }
 window.addEventListener("resize",syncZoneBar);
 
+/* ---------- i18n ---------- */
+let LANG="es";
+const B=(es,en)=>({es,en});                 // par bilingüe
+const tx=o=>o[LANG];                        // resolver par
+const mk=f=>{const a=f("es"),b=f("en");return ()=>LANG==="es"?a:b;};   // thunk bilingüe
+const I18N=[];                              // nodos dinámicos re-traducibles
+function reg(el,f){el._f=f;I18N.push(el);el.textContent=f();return el;}
+function regHTML(el,f){el._fh=f;I18N.push(el);el.innerHTML=f();return el;}
+function retranslate(){
+  for(let i=I18N.length-1;i>=0;i--){
+    const e=I18N[i];
+    if(!e.isConnected){I18N.splice(i,1);continue;}
+    if(e._fh)e.innerHTML=e._fh();else if(e._f)e.textContent=e._f();
+  }
+}
+
 /* ---------- domain ----------
    La prensión NO abre secuencia: es primitiva principal pero encadenada,
    siempre posterior a un alcance / empuje / tracción. */
 const PRIMS={
-  empujar:{label:"empujar",musc:"pectoral mayor",musc2:"deltoides anterior",sub:"extender la muñeca",otra:"traccionar",
-    opts:[{n:"alcance frontal",hold:false,task:"alcanzar el pulsador"},
-          {n:"transporte adelante",hold:true,task:"llevar el huevo a la marca"},
-          {n:"empuje sostenido",hold:false,task:"mantener la puerta abierta"}]},
-  traccionar:{label:"traccionar",musc:"dorsal ancho",musc2:"deltoides posterior",sub:"orientar la muñeca",otra:"empujar",
-    opts:[{n:"aproximación al cuerpo",hold:true,task:"traer el huevo hacia ti"},
-          {n:"arrastre horizontal",hold:true,task:"arrastrar la caja hasta el borde"},
-          {n:"tracción sostenida",hold:false,task:"sostener la cinta tensa"}]}
+  empujar:{label:B("empujar","push"),musc:B("pectoral mayor","pectoralis major"),
+    musc2:B("deltoides anterior","anterior deltoid"),sub:B("extender la muñeca","extending the wrist"),
+    otra:B("traccionar","pull"),ger:B("empuja","pushes"),
+    opts:[{n:B("alcance frontal","frontal reach"),hold:false,task:B("alcanzar el pulsador","reach the button")},
+          {n:B("transporte adelante","forward transport"),hold:true,task:B("llevar el huevo a la marca","move the egg to the mark")},
+          {n:B("empuje sostenido","sustained push"),hold:false,task:B("mantener la puerta abierta","hold the door open")}]},
+  traccionar:{label:B("traccionar","pull"),musc:B("dorsal ancho","latissimus dorsi"),
+    musc2:B("deltoides posterior","posterior deltoid"),sub:B("orientar la muñeca","orienting the wrist"),
+    otra:B("empujar","push"),ger:B("tracciona","pulls"),
+    opts:[{n:B("aproximación al cuerpo","approach to the body"),hold:true,task:B("traer el huevo hacia ti","bring the egg towards you")},
+          {n:B("arrastre horizontal","horizontal drag"),hold:true,task:B("arrastrar la caja hasta el borde","drag the box to the edge")},
+          {n:B("tracción sostenida","sustained pull"),hold:false,task:B("sostener la cinta tensa","keep the strap taut")}]}
 };
 const PKEYS=Object.keys(PRIMS);          // la prensión queda fuera del sorteo inicial
-const CONJ={empujar:"empuja",traccionar:"tracciona"};
+const GROUPS=B("pectoral · dorsal · deltoides · lumbar","pectoralis · latissimus · deltoid · lumbar");
 const LETTERS="ABCDEFGHIJKLMNOPQR";
 const CYCLES=2;
 const MESH_N=18;
 
 function updateSessionUI(){
-  primTxt.textContent="«"+session.prim.label+"»"+(session.holds?" + prensión":"");
-  goalTxt.textContent="«"+session.task+"»";
+  primTxt.textContent="«"+tx(session.prim.label)+"»"+(session.holds?(LANG==="es"?" + prensión":" + grasp"):"");
+  goalTxt.textContent="«"+tx(session.task)+"»";
 }
 function pickExample(){
   const prev=session?session.key:null;
@@ -437,17 +464,16 @@ function genPass(){
   const fin=[0,1,2].map(()=>({ang:rnd(12,84),pow:rnd(25,92)}));
   const cyc=[];
   for(let i=0;i<CYCLES;i++)cyc.push({
-    sensors:shuffle([...Array(MESH_N).keys()]).slice(0,rnd(3,5)).sort((a,b)=>a-b),
+    sensors:shuffle([...Array(MESH_N).keys()]).slice(0,rnd(3,5)).sort((x,y)=>x-y),
     servos:[0,1,2].map((_,j)=>({ang:jitter(fin[j].ang,10,6,90),pow:jitter(fin[j].pow,12,15,98)})),
     da:[-18,0,18][rnd(0,2)]
   });
   return{
     cycles:cyc,
-    sensors:shuffle([...Array(MESH_N).keys()]).slice(0,rnd(3,5)).sort((a,b)=>a-b),
+    sensors:shuffle([...Array(MESH_N).keys()]).slice(0,rnd(3,5)).sort((x,y)=>x-y),
     coarse:fin.map(s=>({ang:jitter(s.ang,14,6,90),pow:jitter(s.pow,18,15,98)})),
     servos:fin,
     heat:{cx:Math.random()*4,cy:Math.random()*4,sig:1+Math.random()*.5},
-    // el listener descarta una vía distinta cada vez, nunca el objetivo
     drop:shuffle([0,1,2].filter(i=>i!==session.goal))[0]
   };
 }
@@ -456,7 +482,6 @@ function genData(pert){
   if(pert)d.p2=genPass();
   return d;
 }
-const optName=i=>session.prim.opts[i].n;
 const sensLetters=a=>{
   const L=a.map(i=>LETTERS[i]);
   return L.length>1?L.slice(0,-1).join(" · ")+" · "+L[L.length-1]:L[0];
@@ -674,14 +699,15 @@ function buildPert(){
 /* ---------- row pieces ---------- */
 function wrapCell(node,cap,accent,drop,zone){
   const w=div("cell "+accent+(drop?" drop":"")+(zone==="oos"?" oosz":""));
-  const f=div("frame");f.appendChild(node);w.appendChild(f);w.appendChild(div("cap",cap));
+  const f=div("frame");f.appendChild(node);w.appendChild(f);
+  w.appendChild(reg(div("cap"),typeof cap==="function"?cap:()=>cap));
   return w;
 }
 function conn(red){const d=div("conn"+(red?" red":""));d.textContent="→";return d;}
 function rowShell(idxTxt,mode,oosMode){
   const row=div("row"),g=div("gutter");
   g.appendChild(div("idx",idxTxt));
-  g.appendChild(div("mode"+(oosMode?" oos":""),mode));
+  g.appendChild(reg(div("mode"+(oosMode?" oos":"")),typeof mode==="function"?mode:()=>mode));
   const t=div("track");
   row.appendChild(g);row.appendChild(t);
   return{row,track:t};
@@ -746,7 +772,7 @@ function longArc(track,toIdx,fromIdx,opts){
   track.appendChild(svg);
   const dot=el("circle",{r:opts.width?opts.width+1.4:2.6,fill:col},svg);
   dot.style.filter="drop-shadow(0 0 5px "+col+")";
-  const lab=div("arclab",opts.label||"");
+  const lab=reg(div("arclab"),typeof opts.label==="function"?opts.label:()=>(opts.label||""));
   lab.style.left=(x0+w*(opts.labX??0.5))+"px";lab.style.top=(opts.labTop??top)+"px";lab.style.color=col;
   track.appendChild(lab);
   requestAnimationFrame(()=>lab.classList.add("in"));
@@ -783,7 +809,7 @@ function cycleOverlay(track,fromIdx,toIdx,label){
     fill:"none",stroke:C.violet,"stroke-width":1.5,"marker-end":"url(#cycA)"},svg);
   arc.style.filter="drop-shadow(0 0 4px rgba(157,140,232,.55))";
   track.appendChild(svg);
-  const lab=div("cyclab",label);
+  const lab=reg(div("cyclab"),typeof label==="function"?label:()=>label);
   lab.style.left=(x0+w/2+14)+"px";lab.style.top=(yb+12)+"px";
   track.appendChild(lab);
   let done;
@@ -831,10 +857,13 @@ function treeStep(d){
   }};
 }
 function buildSteps(d){
-  const SS=d.ex;                       // ejemplo congelado de esta tirada
-  const optNameOf=i=>SS.prim.opts[i].n;
-  const S={};   // estado mutable compartido entre pasos
-  const steps=[];
+  const SS=d.ex, M=d.prim, steps=[];
+  const PL=l=>M.label[l], MU=l=>M.musc[l], MU2=l=>M.musc2[l], SB=l=>M.sub[l],
+        OT=l=>M.otra[l], GE=l=>M.ger[l], TK=l=>SS.task[l],
+        ON=(i,l)=>M.opts[i].n[l], GR=l=>GROUPS[l];
+  const sv=v=>`A/B/C ${v[0].ang}°, ${v[1].ang}°, ${v[2].ang}° (${v[0].pow}/${v[1].pow}/${v[2].pow}%)`;
+  const ES=l=>l==="es";
+
   const cellStep=(label,narr,make)=>steps.push({label,narr,dur:DWELL,mount:async ctx=>{
     const{track,node,cap,accent,opts={}}=make();
     if(track.querySelector(".cell"))ctx.add(track,conn(opts.red));
@@ -842,89 +871,118 @@ function buildSteps(d){
     autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
   }});
 
-  const servTxt=v=>`A/B/C a ${v[0].ang}°, ${v[1].ang}°, ${v[2].ang}° (potencia ${v[0].pow}/${v[1].pow}/${v[2].pow}&thinsp;%)`;
-
   function langTail(getTrack,perturbed){
-    steps.push({label:"capa de lenguaje",
-      narr:perturbed
-        ? `<span class="vu">capa de lenguaje</span> — <b>sin haberle enseñado el vídeo</b> se le pregunta solo por el resultado: «¿lo has conseguido?» → <b>sí</b>. <b>No se le pregunta por la perturbación</b>: si la menciona por su cuenta, se registra como comentario espontáneo.`
-        : `<span class="vu">capa de lenguaje</span> — <b>sin haberle enseñado el vídeo</b> se le pregunta: «¿notas que lo has conseguido?» → <b>sí</b>. Es lo único que puede decir si era <em>eso</em> lo que se quería.`,
+    steps.push({label:mk(l=>ES(l)?"capa de lenguaje":"language layer"),
+      narr:mk(l=>perturbed
+        ? (ES(l)
+          ? `<span class="vu">capa de lenguaje</span> — <b>sin haberle enseñado el vídeo</b> se le pregunta solo por el resultado: «¿lo has conseguido?» → <b>sí</b>. <b>No se le pregunta por la perturbación</b>: si la menciona por su cuenta, se registra como comentario espontáneo.`
+          : `<span class="vu">language layer</span> — <b>before showing any video</b>, only the outcome is asked: "did you manage it?" → <b>yes</b>. <b>The perturbation is never asked about</b>: if the subject brings it up unprompted, it is logged as a spontaneous remark.`)
+        : (ES(l)
+          ? `<span class="vu">capa de lenguaje</span> — <b>sin haberle enseñado el vídeo</b> se le pregunta: «¿notas que lo has conseguido?» → <b>sí</b>. Es lo único que puede decir si era <em>eso</em> lo que se quería.`
+          : `<span class="vu">language layer</span> — <b>before showing any video</b>: "do you feel you achieved it?" → <b>yes</b>. This is the only thing that can tell whether <em>that</em> was what was wanted.`)),
       dur:DWELL,mount:async ctx=>{
         const track=getTrack();
         ctx.add(track,conn(false));
-        const w=wrapCell(buildLang(perturbed),"capa de lenguaje · ¿era esto?",'u',false,"oos");
+        const w=wrapCell(buildLang(perturbed),mk(l=>ES(l)?"capa de lenguaje · ¿era esto?":"language layer · was this it?"),'u',false,"oos");
         ctx.add(track,w);autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
       }});
-    steps.push({label:"aferencia · lenguaje → sujeto",
-      narr:`<span class="vu">catalogado</span> — coincide con la cámara: la tirada se archiva como <b>«${SS.task}» · conseguido · confirmado</b>. Este es el lazo lento; aquí solo registra, no reescribe el mapeo.`,
+    steps.push({label:mk(l=>ES(l)?"aferencia · lenguaje → sujeto":"afference · language → subject"),
+      narr:mk(l=>ES(l)
+        ? `<span class="vu">catalogado</span> — coincide con la cámara: la tirada se archiva como <b>«${TK("es")}» · conseguido · confirmado</b>. Este es el lazo lento; aquí solo registra, no reescribe el mapeo.`
+        : `<span class="vu">catalogued</span> — it agrees with the camera: the trial is filed as <b>"${TK("en")}" · achieved · confirmed</b>. This is the slow loop; here it only records, it does not rewrite the mapping.`),
       dur:140,mount:async ctx=>{
         const track=getTrack(),cells=track.querySelectorAll(".cell").length;
-        const r=longArc(track,0,cells-1,{color:C.user,top:0,height:56,dur:1300,width:1.9,dash:"5 4",labX:0.26,labTop:0,label:"⟵ lazo lento · post-hoc"});
+        const r=longArc(track,0,cells-1,{color:C.user,top:0,height:56,dur:1300,width:1.9,dash:"5 4",
+          labX:0.26,labTop:0,label:mk(l=>ES(l)?"⟵ lazo lento · post-hoc":"⟵ slow loop · post-hoc")});
         ctx.nodes.push(...r.nodes);await r.done;
       }});
   }
+
   // ---- segmento in-sample ----
   function inSample(getTrack,pass,P,adapted,servoInit){
-    const M=d.prim, verb=CONJ[SS.key];
-    if(!adapted){
-      cellStep("intención declarada",
-        `<span class="vu">intención</span> — antes de la tirada, el sujeto declara qué quiere hacer: <b>«${SS.task}»</b>. Queda registrada y bloqueada; nada de lo que venga después puede reescribirla.`,
-        ()=>({track:getTrack(),node:buildIntent(),cap:"intención declarada",accent:"u"}));
-    }else{
-      cellStep("intención (sin cambios)",
-        `<span class="vu">intención</span> — <b>no se vuelve a preguntar</b>: el objetivo declarado sigue siendo «${SS.task}». Lo que cambia es la ruta, no lo que se quiere.`,
-        ()=>({track:getTrack(),node:buildIntent(),cap:"intención · sin cambios",accent:"u"}));
-    }
-    const mallaNarr=adapted
-      ? `<span class="vg">malla</span> — tras el cambio, el reclutamiento se desplaza dentro de los mismos cuatro grupos: ahora responden los sensores <b>${sensLetters(pass.sensors)}</b>. Compensa el <b>${M.musc2}</b>; la señal sigue siendo utilizable.`
-      : `<span class="vg">malla</span> — el usuario contrae el <b>${M.musc}</b>. De los cuatro grupos que la malla cubre —pectoral · dorsal · deltoides · lumbar— responden los sensores <b>${sensLetters(pass.sensors)}</b>: reclutamiento coherente, <b>señal robusta</b>. Nada distal se mide aquí.`;
-    steps.push({label:adapted?"malla · re-lectura":"malla",narr:mallaNarr,dur:DWELL,mount:async ctx=>{
-      const track=getTrack(),svg=buildMesh(pass.sensors);
-      if(track.querySelector(".cell"))ctx.add(track,conn(false));
-      const w=wrapCell(svg,adapted?"①′ malla adaptada":"① malla",'g');ctx.add(track,w);
-      S["mesh"+P]=svg;autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
-    },undo:()=>{S["mesh"+P]=null;}});
+    steps.push({label:mk(l=>adapted?(ES(l)?"intención (sin cambios)":"intention (unchanged)"):(ES(l)?"intención declarada":"declared intention")),
+      narr:mk(l=>adapted
+        ? (ES(l)
+          ? `<span class="vu">intención</span> — <b>no se vuelve a preguntar</b>: el objetivo declarado sigue siendo «${TK("es")}». Lo que cambia es la ruta, no lo que se quiere.`
+          : `<span class="vu">intention</span> — <b>the subject is not asked again</b>: the declared goal is still "${TK("en")}". What changes is the route, not what is wanted.`)
+        : (ES(l)
+          ? `<span class="vu">intención</span> — antes de la tirada, el sujeto declara qué quiere hacer: <b>«${TK("es")}»</b>. Queda registrada y bloqueada; nada de lo que venga después puede reescribirla.`
+          : `<span class="vu">intention</span> — before the trial, the subject declares what they want to do: <b>"${TK("en")}"</b>. It is logged and locked; nothing downstream can rewrite it.`)),
+      dur:DWELL,mount:async ctx=>{
+        const track=getTrack();
+        if(track.querySelector(".cell"))ctx.add(track,conn(false));
+        const w=wrapCell(buildIntent(),mk(l=>adapted?(ES(l)?"intención · sin cambios":"intention · unchanged"):(ES(l)?"intención declarada":"declared intention")),'u');
+        ctx.add(track,w);autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
+      }});
 
-    cellStep(adapted?"activación adaptada":"activación",
-      adapted
-        ? `<span class="vb">activación</span> — el patrón espacial se reorganiza sobre el nuevo reclutamiento y vuelve a estabilizarse.`
-        : `<span class="vb">activación</span> — el patrón espacial se estabiliza sobre el vientre muscular. Relación señal-ruido suficiente para clasificar sin ambigüedad.`,
-      ()=>({track:getTrack(),node:buildHeat(pass.heat),cap:adapted?"②′ activación adaptada":"② activación",accent:"b"}));
+    steps.push({label:mk(l=>adapted?(ES(l)?"malla · re-lectura":"mesh · re-read"):(ES(l)?"malla":"mesh")),
+      narr:mk(l=>adapted
+        ? (ES(l)
+          ? `<span class="vg">malla</span> — tras el cambio, el reclutamiento se desplaza dentro de los mismos cuatro grupos: ahora responden los sensores <b>${sensLetters(pass.sensors)}</b>. Compensa el <b>${MU2("es")}</b>; la señal sigue siendo utilizable.`
+          : `<span class="vg">mesh</span> — after the change, recruitment shifts within the same four groups: sensors <b>${sensLetters(pass.sensors)}</b> now respond. The <b>${MU2("en")}</b> compensates; the signal is still usable.`)
+        : (ES(l)
+          ? `<span class="vg">malla</span> — el usuario contrae el <b>${MU("es")}</b>. De los cuatro grupos que la malla cubre —${GR("es")}— responden los sensores <b>${sensLetters(pass.sensors)}</b>: reclutamiento coherente, <b>señal robusta</b>. Nada distal se mide aquí.`
+          : `<span class="vg">mesh</span> — the user contracts the <b>${MU("en")}</b>. Of the four groups the mesh covers —${GR("en")}— sensors <b>${sensLetters(pass.sensors)}</b> respond: coherent recruitment, <b>robust signal</b>. Nothing distal is measured here.`)),
+      dur:DWELL,mount:async ctx=>{
+        const track=getTrack(),svg=buildMesh(pass.sensors);
+        ctx.add(track,conn(false));
+        const w=wrapCell(svg,mk(l=>adapted?(ES(l)?"①′ malla adaptada":"①′ adapted mesh"):(ES(l)?"① malla":"① mesh")),'g');
+        ctx.add(track,w);S["mesh"+P]=svg;autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
+      },undo:()=>{S["mesh"+P]=null;}});
 
-    steps.push({label:"primitiva motora",
-      narr:`<span class="vi">primitiva motora</span> — el patrón corresponde a la primitiva de <b>«${M.label}»</b>. La prensión no abre secuencia: si hace falta, encadena después.`,
+    cellStep(mk(l=>adapted?(ES(l)?"activación adaptada":"adapted activation"):(ES(l)?"activación":"activation")),
+      mk(l=>adapted
+        ? (ES(l)?`<span class="vb">activación</span> — el patrón espacial se reorganiza sobre el nuevo reclutamiento y vuelve a estabilizarse.`
+                :`<span class="vb">activation</span> — the spatial pattern reorganises over the new recruitment and settles again.`)
+        : (ES(l)?`<span class="vb">activación</span> — el patrón espacial se estabiliza sobre el vientre muscular. Relación señal-ruido suficiente para clasificar sin ambigüedad.`
+                :`<span class="vb">activation</span> — the spatial pattern settles over the muscle belly. Signal-to-noise is enough to classify unambiguously.`)),
+      ()=>({track:getTrack(),node:buildHeat(pass.heat),
+        cap:mk(l=>adapted?(ES(l)?"②′ activación adaptada":"②′ adapted activation"):(ES(l)?"② activación":"② activation")),accent:"b"}));
+
+    steps.push({label:mk(l=>ES(l)?"primitiva motora":"motor primitive"),
+      narr:mk(l=>ES(l)
+        ? `<span class="vi">primitiva motora</span> — el patrón corresponde a la primitiva de <b>«${PL("es")}»</b>. La prensión no abre secuencia: si hace falta, encadena después.`
+        : `<span class="vi">motor primitive</span> — the pattern maps to the <b>"${PL("en")}"</b> primitive. Grasp never opens a sequence: if needed, it chains afterwards.`),
       dur:DWELL,mount:async ctx=>{
         const track=getTrack(),svg=buildPrimitive(SS.key,false);
-        if(track.querySelector(".cell"))ctx.add(track,conn(false));
-        const w=wrapCell(svg,"primitiva · "+M.label,'i');ctx.add(track,w);
+        ctx.add(track,conn(false));
+        const w=wrapCell(svg,mk(l=>(ES(l)?"primitiva · ":"primitive · ")+PL(l)),'i');ctx.add(track,w);
         S["prim"+P]=svg;autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
       },undo:()=>{S["prim"+P]=null;}});
 
-    steps.push({label:"prior biomecánico",
-      narr:`<span class="vi">prior biomecánico</span> — mientras se <b>${verb}</b>, el espacio de gestos posibles no es el repertorio entero: quedan <b>3 vías</b> — ${M.opts.map(o=>"«"+o.n+"»").join(" · ")}.`,
+    steps.push({label:mk(l=>ES(l)?"prior biomecánico":"biomechanical prior"),
+      narr:mk(l=>ES(l)
+        ? `<span class="vi">prior biomecánico</span> — mientras se <b>${GE("es")}</b>, el espacio de gestos posibles no es el repertorio entero: quedan <b>3 vías</b> — ${M.opts.map(o=>"«"+o.n.es+"»").join(" · ")}.`
+        : `<span class="vi">biomechanical prior</span> — while the arm <b>${GE("en")}</b>, the space of possible gestures is not the whole repertoire: <b>3 routes</b> remain — ${M.opts.map(o=>'"'+o.n.en+'"').join(" · ")}.`),
       dur:DWELL,mount:async ctx=>{
         const track=getTrack(),svg=buildPrior(d,0);
         ctx.add(track,conn(false));
-        const w=wrapCell(svg,"prior biomecánico",'i');ctx.add(track,w);
+        const w=wrapCell(svg,mk(l=>ES(l)?"prior biomecánico":"biomechanical prior"),'i');ctx.add(track,w);
         S["prior"+P]=svg;autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
       },undo:()=>{S["prior"+P]=null;}});
 
-    steps.push({label:"servos · arranque",
-      narr:`<span class="vb">servos</span> — arrancan en grueso hacia <b>${servTxt(pass.coarse)}</b>, todavía sin saber cuál de las vías se va a ejecutar.`,
+    steps.push({label:mk(l=>ES(l)?"servos · arranque":"servos · start-up"),
+      narr:mk(l=>ES(l)
+        ? `<span class="vb">servos</span> — arrancan en grueso hacia <b>${sv(pass.coarse)}</b>, todavía sin saber cuál de las vías se va a ejecutar.`
+        : `<span class="vb">servos</span> — they start coarsely towards <b>${sv(pass.coarse)}</b>, still not knowing which route will be executed.`),
       dur:DWELL,mount:async ctx=>{
         const track=getTrack(),box=buildServos(servoInit||null);
         ctx.add(track,conn(false));
-        const w=wrapCell(box,servoInit?"servos re-posicionados":"servos A·B·C",'b');ctx.add(track,w);
-        S["servo"+P]=box;autoscroll();
+        const w=wrapCell(box,mk(l=>servoInit?(ES(l)?"servos re-posicionados":"servos repositioned"):(ES(l)?"servos A·B·C":"servos A·B·C")),'b');
+        ctx.add(track,w);S["servo"+P]=box;autoscroll();
         requestAnimationFrame(()=>{w.classList.add("in");setServos(box,pass.coarse);});
       },undo:()=>{S["servo"+P]=null;}});
 
-    cellStep("listener",
-      `<span class="vl">listener</span> — escucha a la vez el estado que devuelven los servos y la aferencia, y compara con lo que el prior predecía.`,
-      ()=>({track:getTrack(),node:buildListener(false),cap:"listener",accent:"l"}));
+    cellStep(mk(l=>ES(l)?"listener":"listener"),
+      mk(l=>ES(l)
+        ? `<span class="vl">listener</span> — escucha a la vez el estado que devuelven los servos y la aferencia, y compara con lo que el prior predecía.`
+        : `<span class="vl">listener</span> — it listens at once to the state the servos return and to the afference, and compares them with what the prior predicted.`),
+      ()=>({track:getTrack(),node:buildListener(false),cap:mk(l=>"listener"),accent:"l"}));
 
-    steps.push({label:"listener afina el prior",
-      narr:`<span class="vl">listener</span> — engloba malla · activación · primitiva · prior · servos y <b>descarta «${M.opts[pass.drop].n}»</b>: el estado devuelto no encaja con esa vía. Quedan <b>2 vías</b>.`,
+    steps.push({label:mk(l=>ES(l)?"el listener afina el prior":"listener narrows the prior"),
+      narr:mk(l=>ES(l)
+        ? `<span class="vl">listener</span> — engloba malla · activación · primitiva · prior · servos y <b>descarta «${ON(pass.drop,"es")}»</b>: el estado devuelto no encaja con esa vía. Quedan <b>2 vías</b>.`
+        : `<span class="vl">listener</span> — it encircles mesh · activation · primitive · prior · servos and <b>discards "${ON(pass.drop,"en")}"</b>: the returned state does not fit that route. <b>2 routes</b> remain.`),
       dur:120,mount:async ctx=>{
         const track=getTrack();
         const{node,done}=ringOverlay(track,1,5,C.silver,false);
@@ -933,8 +991,10 @@ function buildSteps(d){
         await done;
       },undo:()=>{if(S["prior"+P])renderPrior(S["prior"+P],d,0);}});
 
-    steps.push({label:"retro servos → prior",
-      narr:`<span class="vb">retroalimentación</span> — los servos corrigen a <b>${servTxt(pass.servos)}</b> y el prior se estrecha con cada corrección hasta quedar <b>una sola vía: «${optNameOf(d.goal)}»</b> — el brazo se extiende.`,
+    steps.push({label:mk(l=>ES(l)?"retro servos → prior":"servo feedback → prior"),
+      narr:mk(l=>ES(l)
+        ? `<span class="vb">retroalimentación</span> — los servos corrigen a <b>${sv(pass.servos)}</b> y el prior se estrecha con cada corrección hasta quedar <b>una sola vía: «${ON(d.goal,"es")}»</b> — el brazo se extiende.`
+        : `<span class="vb">feedback</span> — the servos correct to <b>${sv(pass.servos)}</b> and the prior narrows with every correction until <b>a single route remains: "${ON(d.goal,"en")}"</b> — the arm extends.`),
       dur:160,mount:async ctx=>{
         const track=getTrack();
         const r1=retroArc(track,4,6);if(r1.node)ctx.nodes.push(r1.node);
@@ -950,26 +1010,27 @@ function buildSteps(d){
 
     // --- red generadora: N microciclos, cada uno con relectura de malla ---
     for(let ci=0;ci<CYCLES;ci++){
-      const cy=pass.cycles[ci],last=ci===CYCLES-1;
+      const cy=pass.cycles[ci];
       const chainBase=pass.cycles.slice(0,ci).map(c=>({open:false,da:c.da}));
-      steps.push({label:`red generadora · ciclo ${ci+1}/${CYCLES}`,
-        narr:ci===0
-          ? `<span class="vi">red generadora · ciclo 1</span> — <b>la malla se relee</b>: ahora responden <b>${sensLetters(cy.sensors)}</b>. El reclutamiento se ha desplazado <em>dentro del propio gesto</em> y la primitiva <b>sigue siendo «${M.label}»</b>. Con la vía anterior bloqueada como contexto se abre un prior nuevo —${M.sub}—, se resuelve, y los servos corrigen a <b>${servTxt(cy.servos)}</b>.`
-          : `<span class="vi">red generadora · ciclo ${ci+1}</span> — nueva relectura: <b>${sensLetters(cy.sensors)}</b>. Otra constelación distinta, misma primitiva. Se encadena el eslabón <b>${ci+1}</b> sobre los anteriores y los servos vuelven a corregir a <b>${servTxt(cy.servos)}</b>. Si en alguna de estas relecturas el listener viera reaparecer el <b>${M.musc}</b> con fuerza, <b>reescribiría la primitiva</b> y el conjunto de opciones cambiaría entero.`,
+      steps.push({label:mk(l=>(ES(l)?"red generadora · ciclo ":"generative network · cycle ")+(ci+1)+"/"+CYCLES),
+        narr:mk(l=>ci===0
+          ? (ES(l)
+            ? `<span class="vi">red generadora · ciclo 1</span> — <b>la malla se relee</b>: ahora responden <b>${sensLetters(cy.sensors)}</b>. El reclutamiento se ha desplazado <em>dentro del propio gesto</em> y la primitiva <b>sigue siendo «${PL("es")}»</b>. Con la vía anterior bloqueada como contexto se abre un prior nuevo —${SB("es")}—, se resuelve, y los servos corrigen a <b>${sv(cy.servos)}</b>. <b>Este desenrollado es la red generadora</b>: el prior dice qué es admisible, la red decide cuál se despliega ahora dado lo ya bloqueado.`
+            : `<span class="vi">generative network · cycle 1</span> — <b>the mesh is re-read</b>: <b>${sensLetters(cy.sensors)}</b> now respond. Recruitment has shifted <em>within the gesture itself</em> and the primitive is <b>still "${PL("en")}"</b>. With the previous route locked as context, a new prior opens —${SB("en")}—, resolves, and the servos correct to <b>${sv(cy.servos)}</b>. <b>This unrolling is the generative network</b>: the prior says what is admissible, the network decides which one unfolds now given what is already locked.`)
+          : (ES(l)
+            ? `<span class="vi">red generadora · ciclo ${ci+1}</span> — nueva relectura: <b>${sensLetters(cy.sensors)}</b>. Otra constelación distinta, misma primitiva. Se encadena el eslabón <b>${ci+1}</b> sobre los anteriores y los servos vuelven a corregir a <b>${sv(cy.servos)}</b>. Si en alguna de estas relecturas el listener viera reaparecer el <b>${MU("es")}</b> con fuerza, <b>reescribiría la primitiva</b> a «${OT("es")}» y el conjunto de opciones cambiaría entero.`
+            : `<span class="vi">generative network · cycle ${ci+1}</span> — a fresh re-read: <b>${sensLetters(cy.sensors)}</b>. A different constellation, the same primitive. Link <b>${ci+1}</b> chains onto the previous ones and the servos correct again to <b>${sv(cy.servos)}</b>. If in any of these re-reads the listener saw the <b>${MU("en")}</b> fire hard again, it would <b>rewrite the primitive</b> to "${OT("en")}" and the whole option set would change.`)),
         dur:200,mount:async ctx=>{
           const track=getTrack();
           if(ci===0){
-            const c=cycleOverlay(track,4,6,"red generadora \u00d7N \u00b7 mientras la intenci\u00f3n siga viva");
+            const c=cycleOverlay(track,4,6,mk(l=>ES(l)?"red generadora ×N · mientras la intención siga viva":"generative network ×N · while the intention holds"));
             ctx.nodes.push(...c.nodes);
           }
-          // 1 · la malla se relee y el listener escucha, a la vez
           if(S["mesh"+P]){const nm=buildMesh(cy.sensors);S["mesh"+P].replaceWith(nm);S["mesh"+P]=nm;}
           flashCell(track,1,C.green);flashCell(track,6,C.silver);
           await wait(320);
-          // 2 · se abre el eslabón nuevo
           if(S["prior"+P])renderPrior(S["prior"+P],d,3,chainBase.concat([{open:true}]));
           await wait(340);
-          // 3 · se resuelve y los servos corrigen
           if(S["prior"+P])renderPrior(S["prior"+P],d,3,chainBase.concat([{open:false,da:cy.da}]));
           if(S["servo"+P])setServos(S["servo"+P],cy.servos);
           const r=retroArc(track,4,6);if(r.node)ctx.nodes.push(r.node);
@@ -983,93 +1044,124 @@ function buildSteps(d){
     }
 
     if(SS.holds){
-      steps.push({label:"prensión encadenada",
-        narr:`<span class="vi">prensión</span> — <b>encadena sobre el ${M.label==="empujar"?"alcance":"agarre"}</b>: la vía elegida exige sostener la carga, así que la segunda primitiva se activa sin abrir secuencia propia.`,
+      steps.push({label:mk(l=>ES(l)?"prensión encadenada":"chained grasp"),
+        narr:mk(l=>ES(l)
+          ? `<span class="vi">prensión</span> — <b>encadena sobre el ${PL("es")==="empujar"?"alcance":"agarre"}</b>: la vía elegida exige sostener la carga, así que la segunda primitiva se activa sin abrir secuencia propia.`
+          : `<span class="vi">grasp</span> — it <b>chains onto the ${PL("en")==="push"?"reach":"pull"}</b>: the chosen route requires holding the load, so the second primitive activates without opening a sequence of its own.`),
         dur:DWELL,mount:async()=>{
           if(S["prim"+P])renderPrimitive(S["prim"+P],SS.key,true);
         },undo:()=>{if(S["prim"+P])renderPrimitive(S["prim"+P],SS.key,false);}});
     }
   }
+
   function divider(getTrack){
-    steps.push({label:"frontera in sample / out of sample",narr:null,dur:170,mount:async ctx=>{
+    steps.push({label:mk(l=>ES(l)?"frontera dentro / fuera del lazo":"in-loop / out-of-loop boundary"),narr:null,dur:170,mount:async ctx=>{
       const z=div("zdiv");
-      z.appendChild(div("zl","in sample"));z.appendChild(div("vline"));z.appendChild(div("zr","out of sample"));
+      z.appendChild(reg(div("zl"),()=>LANG==="es"?"dentro del lazo":"in-loop"));
+      z.appendChild(div("vline"));
+      z.appendChild(reg(div("zr"),()=>LANG==="es"?"fuera del lazo":"out-of-loop"));
       ctx.add(getTrack(),z);autoscroll();syncZoneBar();
     },undo:()=>syncZoneBar()});
   }
 
+  const S={};
   if(!d.pert){
-    steps.push({label:"fila",narr:null,dur:60,mount:async ctx=>{
-      const r=rowShell("#"+String(d.n).padStart(2,"0"),"nominal",false);
+    steps.push({label:mk(l=>ES(l)?"fila":"row"),narr:null,dur:60,mount:async ctx=>{
+      const r=rowShell("#"+String(d.n).padStart(2,"0"),mk(l=>ES(l)?"nominal":"nominal"),false);
       S.r1=r;ctx.add(S.block,r.row);autoscroll();
     },undo:()=>{S.r1=null;}});
     inSample(()=>S.r1.track,d.p1,"a",false,null);
     divider(()=>S.r1.track);
-    cellStep("cámaras",`<span class="va">cámaras</span> — el registro externo certifica que el gesto ocurrió <b>en el mundo</b>, no solo en la predicción.`,
-      ()=>({track:S.r1.track,node:buildCamera(),cap:"cámaras · registro",accent:"a",opts:{zone:"oos"}}));
-    cellStep("resultado",`<span class="va">resultado</span> — <b>«${SS.task}» ✓</b>${SS.holds?", con la carga sostenida":""}. Esto es lo único que tiene que mantenerse igual entre días.`,
-      ()=>({track:S.r1.track,node:buildGesture(SS.key,SS.holds),cap:"resultado ✓",accent:"a",opts:{zone:"oos"}}));
-    steps.push({label:"aferencia · cámara → sujeto",
-      narr:`<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual: lenta, y <b>obliga a mirar</b>.`,
+    cellStep(mk(l=>ES(l)?"cámaras":"cameras"),
+      mk(l=>ES(l)
+        ? `<span class="va">cámaras</span> — el registro externo certifica que el gesto ocurrió <b>en el mundo</b>, no solo en la predicción.`
+        : `<span class="va">cameras</span> — the external record certifies that the gesture happened <b>in the world</b>, not only in the prediction.`),
+      ()=>({track:S.r1.track,node:buildCamera(),cap:mk(l=>ES(l)?"cámaras · registro":"cameras · recording"),accent:"a",opts:{zone:"oos"}}));
+    cellStep(mk(l=>ES(l)?"resultado":"outcome"),
+      mk(l=>ES(l)
+        ? `<span class="va">resultado</span> — <b>«${TK("es")}» ✓</b>${SS.holds?", con la carga sostenida":""}. Esto es lo único que tiene que mantenerse igual entre días.`
+        : `<span class="va">outcome</span> — <b>"${TK("en")}" ✓</b>${SS.holds?", with the load held":""}. This is the only thing that has to stay the same across days.`),
+      ()=>({track:S.r1.track,node:buildGesture(SS.key,SS.holds),cap:mk(l=>ES(l)?"resultado ✓":"outcome ✓"),accent:"a",opts:{zone:"oos"}}));
+    steps.push({label:mk(l=>ES(l)?"aferencia · cámara → sujeto":"afference · camera → subject"),
+      narr:mk(l=>ES(l)
+        ? `<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual: lenta, y <b>obliga a mirar</b>.`
+        : `<span class="va">camera afference</span> — the outcome returns to the subject visually: slow, and it <b>forces them to look</b>.`),
       dur:140,mount:async ctx=>{
-        const r=longArc(S.r1.track,0,8,{color:C.amber,top:16,height:40,dur:1000,width:1.4,marker:"url(#retAm)",labX:0.60,labTop:20,label:"⟵ aferencia visual · s"});
+        const r=longArc(S.r1.track,0,8,{color:C.amber,top:16,height:40,dur:1000,width:1.4,marker:"url(#retAm)",
+          labX:0.60,labTop:20,label:mk(l=>ES(l)?"⟵ aferencia visual · s":"⟵ visual afference · s")});
         ctx.nodes.push(...r.nodes);await r.done;
       }});
     langTail(()=>S.r1.track,false);
-    steps.push({label:"cierre del lazo",narr:`<b>cadena cerrada ✓</b> — la ruta fue nueva; el resultado, el mismo de siempre.`,
+    steps.push({label:mk(l=>ES(l)?"cierre del lazo":"loop closed"),
+      narr:mk(l=>ES(l)?`<b>cadena cerrada ✓</b> — la ruta fue nueva; el resultado, el mismo de siempre.`
+                      :`<b>chain closed ✓</b> — the route was new; the outcome, the same as always.`),
       dur:120,mount:async ctx=>{
         const p=pulseRow(S.r1.track,false);if(p.node)ctx.nodes.push(p.node);
         await p.done;
-        const t=div("tag blue","↩ retorno");ctx.add(S.r1.track,t);
+        ctx.add(S.r1.track,reg(div("tag blue"),()=>LANG==="es"?"↩ retorno":"↩ return"));
       }});
     steps.push(treeStep(d));
   }else{
-    steps.push({label:"fila · percepción",narr:null,dur:60,mount:async ctx=>{
-      const r=rowShell("#"+String(d.n).padStart(2,"0")+"·a","perturbación",true);
+    steps.push({label:mk(l=>ES(l)?"fila · percepción":"row · perception"),narr:null,dur:60,mount:async ctx=>{
+      const r=rowShell("#"+String(d.n).padStart(2,"0")+"·a",mk(l=>ES(l)?"perturbación":"perturbation"),true);
       S.r1=r;ctx.add(S.block,r.row);autoscroll();
     },undo:()=>{S.r1=null;}});
     inSample(()=>S.r1.track,d.p1,"a",false,null);
     divider(()=>S.r1.track);
-    cellStep("cambio externo súbito",
-      `<span class="vr">cambio externo súbito</span> — algo cambia fuera de muestra en pleno gesto: la carga no responde como el prior predecía.`,
-      ()=>({track:S.r1.track,node:buildPert(),cap:"⚡ cambio externo súbito",accent:"r",opts:{red:true,drop:true,zone:"oos"}}));
-    cellStep("adaptación en tiempo real",
-      `<span class="vr">listener</span> — lo detecta por la <b>discrepancia</b> entre lo que predecía el prior y la aferencia que vuelve. No espera al final del gesto: <b>re-abre el prior</b> a sus 3 vías.`,
-      ()=>({track:S.r1.track,node:buildListener(true),cap:"adaptación en tiempo real",accent:"r",opts:{red:true,zone:"oos"}}));
-    steps.push({label:"re-englobe y re-ruteo",
-      narr:`<span class="vr">re-ruteo</span> — re-engloba malla · activación · primitiva · prior · servos y lanza una pasada nueva <b>sin cambiar el objetivo</b>.`,
+    cellStep(mk(l=>ES(l)?"cambio externo súbito":"sudden external change"),
+      mk(l=>ES(l)
+        ? `<span class="vr">cambio externo súbito</span> — algo cambia <b>fuera del lazo</b> en pleno gesto: la carga no responde como el prior predecía.`
+        : `<span class="vr">sudden external change</span> — something changes <b>outside the loop</b> mid-gesture: the load does not respond as the prior predicted.`),
+      ()=>({track:S.r1.track,node:buildPert(),cap:mk(l=>ES(l)?"⚡ cambio externo súbito":"⚡ sudden external change"),accent:"r",opts:{red:true,drop:true,zone:"oos"}}));
+    cellStep(mk(l=>ES(l)?"adaptación en tiempo real":"real-time adaptation"),
+      mk(l=>ES(l)
+        ? `<span class="vr">listener</span> — lo detecta por la <b>discrepancia</b> entre lo que predecía el prior y la aferencia que vuelve. No espera al final del gesto: <b>re-abre el prior</b> a sus 3 vías.`
+        : `<span class="vr">listener</span> — it detects this from the <b>mismatch</b> between what the prior predicted and the afference coming back. It does not wait for the gesture to end: it <b>re-opens the prior</b> to its 3 routes.`),
+      ()=>({track:S.r1.track,node:buildListener(true),cap:mk(l=>ES(l)?"adaptación en tiempo real":"real-time adaptation"),accent:"r",opts:{red:true,zone:"oos"}}));
+    steps.push({label:mk(l=>ES(l)?"re-englobe y re-ruteo":"re-encircle and re-route"),
+      narr:mk(l=>ES(l)
+        ? `<span class="vr">re-ruteo</span> — re-engloba malla · activación · primitiva · prior · servos y lanza una pasada nueva <b>sin cambiar el objetivo</b>.`
+        : `<span class="vr">re-route</span> — it re-encircles mesh · activation · primitive · prior · servos and launches a fresh pass <b>without changing the goal</b>.`),
       dur:160,mount:async ctx=>{
         const track=S.r1.track;
         const{node,done}=ringOverlay(track,1,6,C.red,true);
         if(node)ctx.nodes.push(node);
         setTimeout(()=>{if(S.priora)renderPrior(S.priora,d,0);},reduce?0:T(380));
         await done;
-        ctx.add(track,div("tag red","⤵ re-ruteo"));
+        ctx.add(track,reg(div("tag red"),()=>LANG==="es"?"⤵ re-ruteo":"⤵ re-route"));
         autoscroll();
       },undo:()=>{if(S.priora)renderPrior(S.priora,d,2);}});
-    steps.push({label:"fila · pasada adaptada",narr:null,dur:60,mount:async ctx=>{
-      const r=rowShell("#"+String(d.n).padStart(2,"0")+"·b","pasada adaptada",true);
+    steps.push({label:mk(l=>ES(l)?"fila · pasada adaptada":"row · adapted pass"),narr:null,dur:60,mount:async ctx=>{
+      const r=rowShell("#"+String(d.n).padStart(2,"0")+"·b",mk(l=>ES(l)?"pasada adaptada":"adapted pass"),true);
       S.r2=r;ctx.add(S.block,r.row);autoscroll();
     },undo:()=>{S.r2=null;}});
     inSample(()=>S.r2.track,d.p2,"b",true,d.p1.servos);
     divider(()=>S.r2.track);
-    cellStep("cámaras",`<span class="va">cámaras</span> — certifican el gesto <b>adaptado</b>: ocurrió, y ocurrió bien.`,
-      ()=>({track:S.r2.track,node:buildCamera(),cap:"cámaras · registro",accent:"a",opts:{zone:"oos"}}));
-    cellStep("resultado adaptado",
-      `<span class="va">resultado</span> — <b>«${SS.task}» ✓</b>: el mismo resultado, alcanzado con otro reclutamiento y otros ángulos.`,
-      ()=>({track:S.r2.track,node:buildGesture(SS.key,SS.holds),cap:"resultado ✓ · adaptado",accent:"a",opts:{zone:"oos"}}));
-    steps.push({label:"aferencia · cámara → sujeto",
-      narr:`<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual.`,
+    cellStep(mk(l=>ES(l)?"cámaras":"cameras"),
+      mk(l=>ES(l)?`<span class="va">cámaras</span> — certifican el gesto <b>adaptado</b>: ocurrió, y ocurrió bien.`
+                 :`<span class="va">cameras</span> — they certify the <b>adapted</b> gesture: it happened, and it happened well.`),
+      ()=>({track:S.r2.track,node:buildCamera(),cap:mk(l=>ES(l)?"cámaras · registro":"cameras · recording"),accent:"a",opts:{zone:"oos"}}));
+    cellStep(mk(l=>ES(l)?"resultado adaptado":"adapted outcome"),
+      mk(l=>ES(l)
+        ? `<span class="va">resultado</span> — <b>«${TK("es")}» ✓</b>: el mismo resultado, alcanzado con otro reclutamiento y otros ángulos.`
+        : `<span class="va">outcome</span> — <b>"${TK("en")}" ✓</b>: the same outcome, reached with different recruitment and different angles.`),
+      ()=>({track:S.r2.track,node:buildGesture(SS.key,SS.holds),cap:mk(l=>ES(l)?"resultado ✓ · adaptado":"outcome ✓ · adapted"),accent:"a",opts:{zone:"oos"}}));
+    steps.push({label:mk(l=>ES(l)?"aferencia · cámara → sujeto":"afference · camera → subject"),
+      narr:mk(l=>ES(l)?`<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual.`
+                      :`<span class="va">camera afference</span> — the outcome returns to the subject visually.`),
       dur:140,mount:async ctx=>{
-        const r=longArc(S.r2.track,0,8,{color:C.amber,top:14,height:40,dur:1000,width:1.4,marker:"url(#retAm)",label:"⟵ aferencia visual · s"});
+        const r=longArc(S.r2.track,0,8,{color:C.amber,top:16,height:40,dur:1000,width:1.4,marker:"url(#retAm)",
+          labX:0.60,labTop:20,label:mk(l=>ES(l)?"⟵ aferencia visual · s":"⟵ visual afference · s")});
         ctx.nodes.push(...r.nodes);await r.done;
       }});
     langTail(()=>S.r2.track,true);
-    steps.push({label:"cierre del lazo",narr:`<b>cadena cerrada con re-ruteo ✓</b> — la ruta cambió por completo; el resultado, no.`,
+    steps.push({label:mk(l=>ES(l)?"cierre del lazo":"loop closed"),
+      narr:mk(l=>ES(l)?`<b>cadena cerrada con re-ruteo ✓</b> — la ruta cambió por completo; el resultado, no.`
+                      :`<b>chain closed with a re-route ✓</b> — the route changed completely; the outcome did not.`),
       dur:120,mount:async ctx=>{
         const p=pulseRow(S.r2.track,true);if(p.node)ctx.nodes.push(p.node);
         await p.done;
-        ctx.add(S.r2.track,div("tag red","↩ aferente"));
+        ctx.add(S.r2.track,reg(div("tag red"),()=>LANG==="es"?"↩ aferente":"↩ afferent"));
       }});
     steps.push(treeStep(d));
   }
@@ -1077,25 +1169,29 @@ function buildSteps(d){
 }
 
 /* ---------- narración ---------- */
-function pushNarr(html,n){
+function pushNarr(fn,n){
   const e=consoleBody.querySelector(".cempty");if(e)e.remove();
   const c=div("cline"),m=div("m","#"+String(n).padStart(2,"0")+" ▸"),b=document.createElement("span");
-  b.innerHTML=html;c.appendChild(m);c.appendChild(b);consoleBody.appendChild(c);
+  regHTML(b,typeof fn==="function"?fn:()=>fn);c.appendChild(m);c.appendChild(b);consoleBody.appendChild(c);
   requestAnimationFrame(()=>c.classList.add("in"));
   consoleBody.scrollTop=consoleBody.scrollHeight;
+}
+function emptyConsole(){
+  consoleBody.innerHTML="";
+  const e=div("cempty");consoleBody.appendChild(reg(e,()=>LANG==="es"?"Sin historia todavía.":"No story yet."));
 }
 function popNarr(){
   const all=consoleBody.querySelectorAll(".cline");
   if(all.length)all[all.length-1].remove();
-  if(!consoleBody.querySelector(".cline"))consoleBody.innerHTML='<span class="cempty">Sin historia todavía.</span>';
+  if(!consoleBody.querySelector(".cline"))emptyConsole();
 }
 function printStory(rec){
   consoleBody.innerHTML="";
   const lines=rec.steps.filter(s=>s.narr).map(s=>s.narr);
-  if(!lines.length){consoleBody.innerHTML='<span class="cempty">Sin historia todavía.</span>';return;}
-  lines.forEach((html,i)=>{
+  if(!lines.length){emptyConsole();return;}
+  lines.forEach((fn,i)=>{
     const c=div("cline"),m=div("m","#"+String(rec.d.n).padStart(2,"0")+" ▸"),b=document.createElement("span");
-    b.innerHTML=html;c.appendChild(m);c.appendChild(b);consoleBody.appendChild(c);
+    regHTML(b,typeof fn==="function"?fn:()=>fn);c.appendChild(m);c.appendChild(b);consoleBody.appendChild(c);
     setTimeout(()=>c.classList.add("in"),reduce?0:T(80*i));
   });
   consoleBody.scrollTop=0;
@@ -1143,11 +1239,11 @@ function redrawTree(){
   treeG.innerHTML="";
   const H=170,rootX=26,rootY=H/2;
   el("line",{x1:RAIL,y1:22,x2:RAIL,y2:H-22,stroke:"#3a2e18","stroke-width":1.4},treeG);
-  const rl=el("text",{x:RAIL+6,y:H/2,fill:"#8a6a2e","font-size":8,"font-family":FONT},treeG);rl.textContent="resultado";
+  const rl=el("text",{x:RAIL+6,y:H/2,fill:"#8a6a2e","font-size":8,"font-family":FONT},treeG);rl.textContent=LANG==="es"?"resultado":"outcome";
   const rc=el("circle",{cx:rootX,cy:rootY,r:4.5,fill:C.soft},treeG);rc.style.filter="drop-shadow(0 0 4px rgba(113,130,123,.5))";
-  const rt=el("text",{x:rootX-8,y:rootY+16,fill:"#47554F","font-size":7.5,"font-family":FONT},treeG);rt.textContent="raíz";
+  const rt=el("text",{x:rootX-8,y:rootY+16,fill:"#47554F","font-size":7.5,"font-family":FONT},treeG);rt.textContent=LANG==="es"?"raíz":"root";
   const n=strat.length;
-  if(!n){const h=el("text",{x:rootX+20,y:rootY+3,fill:"#47554F","font-size":8.5,"font-family":FONT},treeG);h.textContent="— sin rutas —";return;}
+  if(!n){const h=el("text",{x:rootX+20,y:rootY+3,fill:"#47554F","font-size":8.5,"font-family":FONT},treeG);h.textContent=LANG==="es"?"— sin rutas —":"— no routes —";return;}
   strat.forEach((s,i)=>drawBranch(rootX,rootY,n===1?rootY:26+(H-52)*(i/(n-1)),s,i===n-1));
 }
 
@@ -1155,7 +1251,8 @@ function redrawTree(){
 function updateStepUI(){
   const n=cur?cur.steps.length:0,i=cur?cur.idx:0;
   stepNum.textContent=i+" / "+n;
-  stepLab.textContent=cur&&i>0?cur.steps[i-1].label:"—";
+  const lb=cur&&i>0?cur.steps[i-1].label:null;
+  stepLab.textContent=lb?(typeof lb==="function"?lb():lb):"—";
   navgrp.classList.toggle("live",!!cur&&!anim);
   btnPrev.disabled=!cur||i<=0||anim;
   btnNext.disabled=!cur||i>=n||anim;
@@ -1187,6 +1284,64 @@ async function playAll(){
   }
 }
 
+
+/* ---------- diccionario de interfaz ---------- */
+const D={
+  eyebrow:B("animación conceptual · lazo de control","conceptual animation · control loop"),
+  title:B("Registro de interacciones<br><em>la ruta cambia, el resultado no</em>",
+          "Interaction log<br><em>the route changes, the outcome does not</em>"),
+  stPrim:B("primitiva:","primitive:"),
+  stGoal:B("objetivo de esta tirada","goal of this trial"),
+  banner:B("<b>Animación conceptual — no son datos reales.</b><br>Ilustra el mecanismo propuesto (primitiva → prior biomecánico → afinado por el listener → red generadora que desenrolla el gesto). Los sensores, ángulos y potencias que aparecen se generan para la demostración y no proceden de ningún registro experimental.",
+           "<b>Conceptual animation — not real data.</b><br>It illustrates the proposed mechanism (primitive → biomechanical prior → narrowed by the listener → generative network unrolling the gesture). The sensors, angles and power values shown are generated for the demo and come from no experimental record."),
+  btnNew:B("nueva interacción","new interaction"),
+  swPert:B("perturbación","perturbation"), swPertSub:B("cambio externo súbito","sudden external change"),
+  swStep:B("paso a paso","step by step"),
+  btnReset:B("reiniciar","reset"),
+  slow:B("lento","slow"), fast:B("rápido","fast"),
+  cIter:B("interacciones","interactions"), cOos:B("cambios externos","external changes"),
+  lg1:B("sujeto (intención declarada · confirmación)","subject (declared intention · confirmation)"),
+  lg2:B("① malla","① mesh"), lg3:B("② activación","② activation"),
+  lg4:B("primitiva · prior biomecánico · red generadora (×N)","primitive · biomechanical prior · generative network (×N)"),
+  lg5:B("servos (arrancan y corrigen)","servos (start up and correct)"),
+  lg6:B("listener (engloba, escucha el retorno y afina el prior)","listener (encircles, hears the return, narrows the prior)"),
+  lg7:B("⚡ cambio externo súbito","⚡ sudden external change"),
+  lg8:B("cámaras · resultado · capa de lenguaje","cameras · outcome · language layer"),
+  ledgerHead:B("tira impresa · lo más reciente abajo · clic = historia","printed strip · most recent at the bottom · click = story"),
+  window6:B("— ventana de 6 —","— window of 6 —"),
+  zbIsT:B("dentro del lazo","in-loop"), zbOosT:B("fuera del lazo","out-of-loop"),
+  zbIs:B("lo que el decodificador ve y manipula","what the decoder sees and manipulates"),
+  zbOos:B("lo que nunca ve · verificación independiente","what it never sees · independent verification"),
+  storyHead:B("historia de la interacción","story of the interaction"),
+  storyHint:B("— clic en una fila para releerla · arrastra el borde inferior para ajustar —",
+              "— click a row to re-read it · drag the bottom edge to resize —"),
+  treeTitle:B("Estrategias · una rama por tirada · las perturbadas se bifurcan",
+              "Strategies · one branch per trial · perturbed ones fork"),
+  schematic:B("animación conceptual · no son datos reales","conceptual animation · not real data")
+};
+function applyI18n(){
+  document.querySelectorAll("[data-i18n]").forEach(e=>{e.textContent=tx(D[e.dataset.i18n]);});
+  document.querySelectorAll("[data-i18n-html]").forEach(e=>{e.innerHTML=tx(D[e.dataset.i18nHtml]);});
+  document.documentElement.lang=LANG;
+  document.title=LANG==="es"?"Registro de interacciones · animación conceptual"
+                            :"Interaction log · conceptual animation";
+}
+function setLang(l){
+  if(l===LANG)return;
+  LANG=l;
+  $("#langEs").classList.toggle("on",l==="es");
+  $("#langEn").classList.toggle("on",l==="en");
+  applyI18n();
+  retranslate();
+  updateSessionUI();
+  setMode(perturb);
+  setStepMode(stepMode);
+  updateStatus();
+  updateStepUI();
+  redrawTree();
+  syncZoneBar();
+}
+
 /* ---------- flujo ---------- */
 function trimWindow(){
   while(strat.length>WINDOW){
@@ -1202,12 +1357,14 @@ function trimWindow(){
 }
 function updateStatus(){
   cIter.textContent=iter;cOos.textContent=oos;
-  treeSub.textContent=strat.length?`${strat.length} ruta(s) · un mismo resultado`:"sin rutas todavía";
+  treeSub.textContent=strat.length
+    ?(LANG==="es"?`${strat.length} ruta(s) registradas`:`${strat.length} route(s) logged`)
+    :(LANG==="es"?"sin rutas todavía":"no routes yet");
 }
 function setMode(on){
   perturb=on;
   sw.classList.toggle("on",on);btnNew.classList.toggle("armed",on);led.classList.toggle("oos",on);
-  modeTxt.textContent=on?"cambio externo armado":"modo nominal";
+  modeTxt.textContent=on?(LANG==="es"?"cambio externo armado":"external change armed"):(LANG==="es"?"modo nominal":"nominal mode");
 }
 function lock(on){btnNew.disabled=on;btnReset.disabled=on;chk.disabled=on;}
 
@@ -1233,7 +1390,7 @@ async function stamp(pert){
   cur={block,d,steps,ctxs:new Array(steps.length),idx:0};
   if(selBlock)selBlock.classList.remove("sel");
   selBlock=block;block.classList.add("sel");
-  consoleBody.innerHTML='<span class="cempty">Sin historia todavía.</span>';
+  emptyConsole();
 
   updateStatus();updateStepUI();
 
@@ -1247,8 +1404,8 @@ function reset(){
   const bar=$("#zonebar");
   ledger.innerHTML="";
   ledger.appendChild(bar);
-  ledger.appendChild(div("hint","Pulsa «nueva interacción» para imprimir la primera fila."));
-  consoleBody.innerHTML='<span class="cempty">Sin historia todavía.</span>';
+  ledger.appendChild(reg(div("hint"),()=>LANG==="es"?"Pulsa «nueva interacción» para imprimir la primera fila.":"Press \u201cnew interaction\u201d to print the first row."));
+  emptyConsole();
   newSession();redrawTree();updateStatus();updateStepUI();syncZoneBar();
 }
 
@@ -1259,7 +1416,7 @@ function setStepMode(on){
   stepMode=on;
   chkStep.checked=on;
   swStep.classList.toggle("on",on);
-  $("#stepModeTxt").textContent=on?"avance manual · activado":"reproducción automática";
+  $("#stepModeTxt").textContent=on?(LANG==="es"?"avance manual · activado":"manual advance · on"):(LANG==="es"?"reproducción automática":"automatic playback");
 }
 chkStep.addEventListener("change",e=>setStepMode(e.target.checked));
 btnNext.addEventListener("click",nextStep);
@@ -1269,6 +1426,8 @@ document.addEventListener("keydown",e=>{
   if(e.key==="ArrowRight"){e.preventDefault();nextStep();}
   if(e.key==="ArrowLeft"){e.preventDefault();prevStep();}
 });
+$("#langEs").addEventListener("click",()=>setLang("es"));
+$("#langEn").addEventListener("click",()=>setLang("en"));
 const spd=$("#spd"),spdVal=$("#spdVal");
 spd.addEventListener("input",()=>{
   speed=parseFloat(spd.value);
@@ -1277,6 +1436,9 @@ spd.addEventListener("input",()=>{
 });
 
 document.documentElement.style.setProperty("--spd",speed);
+applyI18n();
+reg($("#hint0"),()=>LANG==="es"?"Pulsa «nueva interacción» para imprimir la primera fila.":"Press \u201cnew interaction\u201d to print the first row.");
+setMode(false);
 setStepMode(chkStep.checked);
 newSession();redrawTree();updateStatus();updateStepUI();
 </script>
