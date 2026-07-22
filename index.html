@@ -430,13 +430,13 @@ function retranslate(){
 const PRIMS={
   empujar:{label:B("empujar","push"),musc:B("pectoral mayor","pectoralis major"),
     musc2:B("deltoides anterior","anterior deltoid"),sub:B("extender la muñeca","extending the wrist"),
-    otra:B("traccionar","pull"),ger:B("empuja","pushes"),
+    otra:B("traccionar","pull"),otraKey:"traccionar",ger:B("empuja","pushes"),
     opts:[{n:B("alcance frontal","frontal reach"),hold:false,task:B("alcanzar el pulsador","reach the button")},
           {n:B("transporte adelante","forward transport"),hold:true,task:B("llevar el huevo a la marca","move the egg to the mark")},
           {n:B("empuje sostenido","sustained push"),hold:false,task:B("mantener la puerta abierta","hold the door open")}]},
   traccionar:{label:B("traccionar","pull"),musc:B("dorsal ancho","latissimus dorsi"),
     musc2:B("deltoides posterior","posterior deltoid"),sub:B("orientar la muñeca","orienting the wrist"),
-    otra:B("empujar","push"),ger:B("tracciona","pulls"),
+    otra:B("empujar","push"),otraKey:"empujar",ger:B("tracciona","pulls"),
     opts:[{n:B("aproximación al cuerpo","approach to the body"),hold:true,task:B("traer el huevo hacia ti","bring the egg towards you")},
           {n:B("arrastre horizontal","horizontal drag"),hold:true,task:B("arrastrar la caja hasta el borde","drag the box to the edge")},
           {n:B("tracción sostenida","sustained pull"),hold:false,task:B("sostener la cinta tensa","keep the strap taut")}]}
@@ -859,7 +859,7 @@ function treeStep(d){
 function buildSteps(d){
   const SS=d.ex, M=d.prim, steps=[];
   const PL=l=>M.label[l], MU=l=>M.musc[l], MU2=l=>M.musc2[l], SB=l=>M.sub[l],
-        OT=l=>M.otra[l], GE=l=>M.ger[l], TK=l=>SS.task[l],
+        OT=l=>M.otra[l], MUO=l=>PRIMS[M.otraKey].musc[l], GE=l=>M.ger[l], TK=l=>SS.task[l],
         ON=(i,l)=>M.opts[i].n[l], GR=l=>GROUPS[l];
   const sv=v=>`A/B/C ${v[0].ang}°, ${v[1].ang}°, ${v[2].ang}° (${v[0].pow}/${v[1].pow}/${v[2].pow}%)`;
   const ES=l=>l==="es";
@@ -1018,8 +1018,8 @@ function buildSteps(d){
             ? `<span class="vi">red generadora · ciclo 1</span> — <b>la malla se relee</b>: ahora responden <b>${sensLetters(cy.sensors)}</b>. El reclutamiento se ha desplazado <em>dentro del propio gesto</em> y la primitiva <b>sigue siendo «${PL("es")}»</b>. Con la vía anterior bloqueada como contexto se abre un prior nuevo —${SB("es")}—, se resuelve, y los servos corrigen a <b>${sv(cy.servos)}</b>. <b>Este desenrollado es la red generadora</b>: el prior dice qué es admisible, la red decide cuál se despliega ahora dado lo ya bloqueado.`
             : `<span class="vi">generative network · cycle 1</span> — <b>the mesh is re-read</b>: <b>${sensLetters(cy.sensors)}</b> now respond. Recruitment has shifted <em>within the gesture itself</em> and the primitive is <b>still "${PL("en")}"</b>. With the previous route locked as context, a new prior opens —${SB("en")}—, resolves, and the servos correct to <b>${sv(cy.servos)}</b>. <b>This unrolling is the generative network</b>: the prior says what is admissible, the network decides which one unfolds now given what is already locked.`)
           : (ES(l)
-            ? `<span class="vi">red generadora · ciclo ${ci+1}</span> — nueva relectura: <b>${sensLetters(cy.sensors)}</b>. Otra constelación distinta, misma primitiva. Se encadena el eslabón <b>${ci+1}</b> sobre los anteriores y los servos vuelven a corregir a <b>${sv(cy.servos)}</b>. Si en alguna de estas relecturas el listener viera reaparecer el <b>${MU("es")}</b> con fuerza, <b>reescribiría la primitiva</b> a «${OT("es")}» y el conjunto de opciones cambiaría entero.`
-            : `<span class="vi">generative network · cycle ${ci+1}</span> — a fresh re-read: <b>${sensLetters(cy.sensors)}</b>. A different constellation, the same primitive. Link <b>${ci+1}</b> chains onto the previous ones and the servos correct again to <b>${sv(cy.servos)}</b>. If in any of these re-reads the listener saw the <b>${MU("en")}</b> fire hard again, it would <b>rewrite the primitive</b> to "${OT("en")}" and the whole option set would change.`)),
+            ? `<span class="vi">red generadora · ciclo ${ci+1}</span> — nueva relectura: <b>${sensLetters(cy.sensors)}</b>. Otra constelación distinta, misma primitiva. Se encadena el eslabón <b>${ci+1}</b> sobre los anteriores y los servos vuelven a corregir a <b>${sv(cy.servos)}</b>. Si en alguna de estas relecturas el listener viera dispararse el <b>${MUO("es")}</b> con fuerza, <b>reescribiría la primitiva</b> a «${OT("es")}» y el conjunto de opciones cambiaría entero.`
+            : `<span class="vi">generative network · cycle ${ci+1}</span> — a fresh re-read: <b>${sensLetters(cy.sensors)}</b>. A different constellation, the same primitive. Link <b>${ci+1}</b> chains onto the previous ones and the servos correct again to <b>${sv(cy.servos)}</b>. If in any of these re-reads the listener saw the <b>${MUO("en")}</b> fire hard, it would <b>rewrite the primitive</b> to "${OT("en")}" and the whole option set would change.`)),
         dur:200,mount:async ctx=>{
           const track=getTrack();
           if(ci===0){
