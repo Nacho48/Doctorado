@@ -260,6 +260,12 @@
     background:rgba(242,184,76,.05);color:var(--amber);font-weight:500;text-align:center;white-space:nowrap}
   table.log th.c-res{color:#e0a94e}
   table.log tr.pert td:first-child{box-shadow:inset 3px 0 0 rgba(240,96,74,.55)}
+  table.log .pa,table.log .pb{display:inline-block;white-space:nowrap}
+  table.log .pa{opacity:.62}
+  table.log .pb{margin-top:2px}
+  table.log .pfx{color:var(--faint);font-size:8.5px;letter-spacing:.1em;margin-right:4px}
+  table.log tr.pert .pb .pfx{color:#a85f52}
+  table.log{min-width:1060px}
   table.log .empty td{color:var(--faint);text-align:center;padding:18px 0;border-bottom:none}
   .note{margin-top:20px;display:flex;align-items:center;gap:10px;font-size:10.5px;letter-spacing:.06em;color:var(--faint);flex-wrap:wrap}
   .note .dot{width:5px;height:5px;border-radius:50%;background:var(--faint)}
@@ -1416,23 +1422,28 @@ function emptyTable(){
 }
 function addLogRow(d){
   const e=logBody.querySelector(".empty");if(e)e.remove();
-  const p=d.pert?d.p2:d.p1;
-  const sens=d.pert?()=>sensLetters(d.p1.sensors)+" → "+sensLetters(d.p2.sensors):()=>sensLetters(p.sensors);
-  const serv=`${p.servos[0].ang}° ${p.servos[1].ang}° ${p.servos[2].ang}°`;
+  const P=d.pert,p1=d.p1,p2=d.p2;
+  const servT=p=>`${p.servos[0].ang}° ${p.servos[1].ang}° ${p.servos[2].ang}°`;
+  const priT=p=>`−«${d.ex.opts[p.drop][LANG]}» → «${d.ex.opts[d.goal][LANG]}» +${CYCLES}`;
+  const dual=(f1,f2)=>()=>`<span class="pa"><span class="pfx">a</span>${f1()}</span><br>`+
+                          `<span class="pb"><span class="pfx">b</span>${f2()}</span>`;
   const tr=document.createElement("tr");
-  if(d.pert)tr.className="pert";
+  if(P)tr.className="pert";
   const cells=[
-    ["c-n",()=>"#"+String(d.n).padStart(2,"0")+(d.pert?(LANG==="es"?" ·perturbada":" ·perturbed"):"")],
-    ["c-want",()=>"«"+d.ex.task[LANG]+"»"],
-    ["c-sens",sens],
-    ["c-serv",()=>serv],
-    ["c-pri",()=>"«"+d.ex.opts[d.goal][LANG]+"» +"+CYCLES+(LANG==="es"?" eslabones":" links")],
-    ["c-ges",()=>"«"+d.ex.task[LANG]+"» ✓"],
-    ["c-cam",()=>tx(D.camOK)],
-    ["c-say",()=>tx(D.sayOK)],
-    ["c-res",()=>"✓"]
+    ["c-n",()=>"#"+String(d.n).padStart(2,"0")+(P?(LANG==="es"?" · perturbada":" · perturbed"):""),false],
+    ["c-want",()=>"«"+d.ex.task[LANG]+"»",false],
+    ["c-sens",P?dual(()=>sensLetters(p1.sensors),()=>sensLetters(p2.sensors)):()=>sensLetters(p1.sensors),P],
+    ["c-serv",P?dual(()=>servT(p1),()=>servT(p2)):()=>servT(p1),P],
+    ["c-pri",P?dual(()=>priT(p1),()=>priT(p2)):()=>priT(p1),P],
+    ["c-ges",()=>"«"+d.ex.task[LANG]+"» ✓",false],
+    ["c-cam",()=>tx(D.camOK),false],
+    ["c-say",()=>tx(D.sayOK),false],
+    ["c-res",()=>"✓",false]
   ];
-  cells.forEach(([cls,f])=>{const td=document.createElement("td");td.className=cls;tr.appendChild(reg(td,f));});
+  cells.forEach(([cls,f,html])=>{
+    const td=document.createElement("td");td.className=cls;
+    tr.appendChild(html?regHTML(td,f):reg(td,f));
+  });
   logBody.appendChild(tr);
   logRows.push(tr);
   while(logRows.length>WINDOW){const old=logRows.shift();if(old.parentNode)old.remove();}
