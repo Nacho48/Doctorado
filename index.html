@@ -314,7 +314,7 @@
     <span class="lg"><span class="chip u"></span>sujeto (intención declarada · confirmación)</span>
     <span class="lg"><span class="chip g"></span>① malla</span>
     <span class="lg"><span class="chip b"></span>② activación</span>
-    <span class="lg"><span class="chip i"></span>primitiva motora · prior biomecánico</span>
+    <span class="lg"><span class="chip i"></span>primitiva · prior biomecánico · red generadora (×N)</span>
     <span class="lg"><span class="chip b"></span>servos (arrancan y corrigen)</span>
     <span class="lg"><span class="chip l"></span>listener (engloba, escucha el retorno y afina el prior)</span>
     <span class="lg"><span class="chip r"></span>⚡ cambio externo súbito</span>
@@ -383,6 +383,14 @@ function div(c,t){const d=document.createElement("div");if(c)d.className=c;if(t!
 function mini(){return el("svg",{viewBox:"0 0 64 64",class:"mini"});}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function flashCell(track,idx,col){
+  const c=[...track.querySelectorAll(".cell")][idx];if(!c)return;
+  const f=c.querySelector(".frame");if(!f)return;
+  const old=f.style.boxShadow;
+  f.style.transition="box-shadow .2s ease";
+  f.style.boxShadow="0 0 0 2px "+col+", 0 0 16px "+col+"66";
+  setTimeout(()=>{f.style.boxShadow=old;},reduce?0:T(430));
+}
 function autoscroll(){ledger.scrollTop=ledger.scrollHeight;}
 function syncZoneBar(){
   const bar=$("#zonebar"),z=ledger.querySelector(".zdiv");
@@ -409,6 +417,7 @@ const PRIMS={
 const PKEYS=Object.keys(PRIMS);          // la prensión queda fuera del sorteo inicial
 const CONJ={empujar:"empuja",traccionar:"tracciona"};
 const LETTERS="ABCDEFGHIJKLMNOPQR";
+const CYCLES=2;
 const MESH_N=18;
 
 function updateSessionUI(){
@@ -426,7 +435,14 @@ function newSession(){session=null;pickExample();}
 function jitter(v,d,lo,hi){return Math.max(lo,Math.min(hi,v+rnd(-d,d)));}
 function genPass(){
   const fin=[0,1,2].map(()=>({ang:rnd(12,84),pow:rnd(25,92)}));
+  const cyc=[];
+  for(let i=0;i<CYCLES;i++)cyc.push({
+    sensors:shuffle([...Array(MESH_N).keys()]).slice(0,rnd(3,5)).sort((a,b)=>a-b),
+    servos:[0,1,2].map((_,j)=>({ang:jitter(fin[j].ang,10,6,90),pow:jitter(fin[j].pow,12,15,98)})),
+    da:[-18,0,18][rnd(0,2)]
+  });
   return{
+    cycles:cyc,
     sensors:shuffle([...Array(MESH_N).keys()]).slice(0,rnd(3,5)).sort((a,b)=>a-b),
     coarse:fin.map(s=>({ang:jitter(s.ang,14,6,90),pow:jitter(s.pow,18,15,98)})),
     servos:fin,
@@ -498,22 +514,36 @@ function renderPrimitive(svg,activeKey,chained){
 function buildPrimitive(activeKey,chained){const s=mini();renderPrimitive(s,activeKey,chained);return s;}
 /* prior biomecánico: abanico de gestos admisibles bajo la primitiva.
    stage 0 = abierto · 1 = afinado por el listener · 2 = convergido por los servos */
-function renderPrior(svg,d,stage){
+function renderPrior(svg,d,stage,chain){
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   const px=13,py=52,len=40,ang=[-72,-46,-20];
   if(stage===3){
-    const a=ang[d.goal]*Math.PI/180,ex=px+Math.cos(a)*len,ey=py+Math.sin(a)*len;
+    const ML=32,base=ang[d.goal];
+    const a=base*Math.PI/180,ex=px+Math.cos(a)*ML,ey=py+Math.sin(a)*ML;
     el("line",{x1:px,y1:py,x2:ex.toFixed(1),y2:ey.toFixed(1),stroke:C.amber,"stroke-width":2,opacity:.4},svg);
     el("rect",{x:(ex-2.7).toFixed(1),y:(ey-2.7).toFixed(1),width:5.4,height:5.4,rx:1.3,fill:C.amber,opacity:.55},svg);
-    [-22,0,22].forEach((da,i)=>{
-      const r2=(ang[d.goal]+da)*Math.PI/180,sx=ex+Math.cos(r2)*11,sy=ey+Math.sin(r2)*11,on=i===1;
-      el("line",{x1:ex.toFixed(1),y1:ey.toFixed(1),x2:sx.toFixed(1),y2:sy.toFixed(1),
-        stroke:C.violet,"stroke-width":on?1.6:1.1,opacity:on?.95:.45},svg);
-      el("circle",{cx:sx.toFixed(1),cy:sy.toFixed(1),r:on?2.3:1.6,fill:C.violet,opacity:on?1:.45},svg);
+    let cx0=ex,cy0=ey,acc=base,done=0;
+    const LL=[9,6];
+    (chain||[]).forEach((lk,j)=>{
+      const ln=LL[j]||5;
+      if(lk.open){
+        [-18,0,18].forEach((da,i)=>{
+          const r2=(acc+da)*Math.PI/180,sx=cx0+Math.cos(r2)*ln,sy=cy0+Math.sin(r2)*ln,on=i===1;
+          el("line",{x1:cx0.toFixed(1),y1:cy0.toFixed(1),x2:sx.toFixed(1),y2:sy.toFixed(1),
+            stroke:C.violet,"stroke-width":on?1.6:1.1,opacity:on?.95:.4},svg);
+          el("circle",{cx:sx.toFixed(1),cy:sy.toFixed(1),r:on?2.2:1.5,fill:C.violet,opacity:on?1:.4},svg);
+        });
+      }else{
+        const r2=(acc+lk.da)*Math.PI/180,sx=cx0+Math.cos(r2)*ln,sy=cy0+Math.sin(r2)*ln;
+        el("line",{x1:cx0.toFixed(1),y1:cy0.toFixed(1),x2:sx.toFixed(1),y2:sy.toFixed(1),
+          stroke:C.violet,"stroke-width":1.7,opacity:.8},svg);
+        el("rect",{x:(sx-2).toFixed(1),y:(sy-2).toFixed(1),width:4,height:4,rx:1,fill:C.violet,opacity:.85},svg);
+        cx0=sx;cy0=sy;acc+=lk.da;done++;
+      }
     });
     el("circle",{cx:px,cy:py,r:2.6,fill:C.violet},svg);
-    const t3=el("text",{x:px-6,y:60,fill:"#6b62a0","font-size":6.5,"font-family":FONT},svg);
-    t3.textContent="prior 2 \u00d7N";
+    const t3=el("text",{x:px-7,y:60,fill:"#6b62a0","font-size":6.5,"font-family":FONT},svg);
+    t3.textContent="eslab\u00f3n "+done+"/"+CYCLES;
     return svg;
   }
   let live=[0,1,2];
@@ -845,11 +875,15 @@ function buildSteps(d){
         `<span class="vu">intención</span> — <b>no se vuelve a preguntar</b>: el objetivo declarado sigue siendo «${SS.task}». Lo que cambia es la ruta, no lo que se quiere.`,
         ()=>({track:getTrack(),node:buildIntent(),cap:"intención · sin cambios",accent:"u"}));
     }
-    cellStep(adapted?"malla · re-lectura":"malla",
-      adapted
-        ? `<span class="vg">malla</span> — tras el cambio, el reclutamiento se desplaza dentro de los mismos cuatro grupos: ahora responden los sensores <b>${sensLetters(pass.sensors)}</b>. Compensa el <b>${M.musc2}</b>; la señal sigue siendo utilizable.`
-        : `<span class="vg">malla</span> — el usuario contrae el <b>${M.musc}</b>. De los cuatro grupos que la malla cubre —pectoral · dorsal · deltoides · lumbar— responden los sensores <b>${sensLetters(pass.sensors)}</b>: reclutamiento coherente, <b>señal robusta</b>. Nada distal se mide aquí.`,
-      ()=>({track:getTrack(),node:buildMesh(pass.sensors),cap:adapted?"①′ malla · re-lectura":"① malla",accent:"g"}));
+    const mallaNarr=adapted
+      ? `<span class="vg">malla</span> — tras el cambio, el reclutamiento se desplaza dentro de los mismos cuatro grupos: ahora responden los sensores <b>${sensLetters(pass.sensors)}</b>. Compensa el <b>${M.musc2}</b>; la señal sigue siendo utilizable.`
+      : `<span class="vg">malla</span> — el usuario contrae el <b>${M.musc}</b>. De los cuatro grupos que la malla cubre —pectoral · dorsal · deltoides · lumbar— responden los sensores <b>${sensLetters(pass.sensors)}</b>: reclutamiento coherente, <b>señal robusta</b>. Nada distal se mide aquí.`;
+    steps.push({label:adapted?"malla · re-lectura":"malla",narr:mallaNarr,dur:DWELL,mount:async ctx=>{
+      const track=getTrack(),svg=buildMesh(pass.sensors);
+      if(track.querySelector(".cell"))ctx.add(track,conn(false));
+      const w=wrapCell(svg,adapted?"①′ malla adaptada":"① malla",'g');ctx.add(track,w);
+      S["mesh"+P]=svg;autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
+    },undo:()=>{S["mesh"+P]=null;}});
 
     cellStep(adapted?"activación adaptada":"activación",
       adapted
@@ -914,13 +948,39 @@ function buildSteps(d){
         if(S["servo"+P])setServos(S["servo"+P],pass.coarse);
       }});
 
-    steps.push({label:"prior encadenado ×N",
-      narr:`<span class="vi">prior encadenado</span> — resuelta esa vía, <b>queda bloqueada como contexto</b> y sobre ella se abre un <b>prior nuevo</b> —${M.sub}— con sus propias opciones. Mientras la intención de «${SS.task}» siga viva y la primitiva siga siendo «${M.label}», el ciclo se repite <b>N veces</b>: cada prior resuelto restringe al siguiente, y solo se recorre la combinatoria de <em>esta</em> primitiva. Si el listener reescribiera la primitiva a «${M.otra}», el conjunto de opciones cambiaría entero.`,
-      dur:DWELL,mount:async ctx=>{
-        if(S["prior"+P])renderPrior(S["prior"+P],d,3);
-        const c=cycleOverlay(getTrack(),4,6,"\u00d7N \u00b7 mientras la intenci\u00f3n siga viva");
-        ctx.nodes.push(...c.nodes);await c.done;
-      },undo:()=>{if(S["prior"+P])renderPrior(S["prior"+P],d,2);}});
+    // --- red generadora: N microciclos, cada uno con relectura de malla ---
+    for(let ci=0;ci<CYCLES;ci++){
+      const cy=pass.cycles[ci],last=ci===CYCLES-1;
+      const chainBase=pass.cycles.slice(0,ci).map(c=>({open:false,da:c.da}));
+      steps.push({label:`red generadora · ciclo ${ci+1}/${CYCLES}`,
+        narr:ci===0
+          ? `<span class="vi">red generadora · ciclo 1</span> — <b>la malla se relee</b>: ahora responden <b>${sensLetters(cy.sensors)}</b>. El reclutamiento se ha desplazado <em>dentro del propio gesto</em> y la primitiva <b>sigue siendo «${M.label}»</b>. Con la vía anterior bloqueada como contexto se abre un prior nuevo —${M.sub}—, se resuelve, y los servos corrigen a <b>${servTxt(cy.servos)}</b>.`
+          : `<span class="vi">red generadora · ciclo ${ci+1}</span> — nueva relectura: <b>${sensLetters(cy.sensors)}</b>. Otra constelación distinta, misma primitiva. Se encadena el eslabón <b>${ci+1}</b> sobre los anteriores y los servos vuelven a corregir a <b>${servTxt(cy.servos)}</b>. Si en alguna de estas relecturas el listener viera reaparecer el <b>${M.musc}</b> con fuerza, <b>reescribiría la primitiva</b> y el conjunto de opciones cambiaría entero.`,
+        dur:200,mount:async ctx=>{
+          const track=getTrack();
+          if(ci===0){
+            const c=cycleOverlay(track,4,6,"red generadora \u00d7N \u00b7 mientras la intenci\u00f3n siga viva");
+            ctx.nodes.push(...c.nodes);
+          }
+          // 1 · la malla se relee y el listener escucha, a la vez
+          if(S["mesh"+P]){const nm=buildMesh(cy.sensors);S["mesh"+P].replaceWith(nm);S["mesh"+P]=nm;}
+          flashCell(track,1,C.green);flashCell(track,6,C.silver);
+          await wait(320);
+          // 2 · se abre el eslabón nuevo
+          if(S["prior"+P])renderPrior(S["prior"+P],d,3,chainBase.concat([{open:true}]));
+          await wait(340);
+          // 3 · se resuelve y los servos corrigen
+          if(S["prior"+P])renderPrior(S["prior"+P],d,3,chainBase.concat([{open:false,da:cy.da}]));
+          if(S["servo"+P])setServos(S["servo"+P],cy.servos);
+          const r=retroArc(track,4,6);if(r.node)ctx.nodes.push(r.node);
+          await r.done;
+        },
+        undo:()=>{
+          if(S["mesh"+P]){const om=buildMesh(ci===0?pass.sensors:pass.cycles[ci-1].sensors);S["mesh"+P].replaceWith(om);S["mesh"+P]=om;}
+          if(S["prior"+P])renderPrior(S["prior"+P],d,ci===0?2:3,ci===0?null:pass.cycles.slice(0,ci).map(c=>({open:false,da:c.da})));
+          if(S["servo"+P])setServos(S["servo"+P],ci===0?pass.servos:pass.cycles[ci-1].servos);
+        }});
+    }
 
     if(SS.holds){
       steps.push({label:"prensión encadenada",
