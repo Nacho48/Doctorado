@@ -272,7 +272,7 @@
     <div class="status" aria-live="polite">
       <div class="row1"><span class="led" id="led"></span><b id="modeTxt">modo nominal</b></div>
       <span class="sc">primitiva: <b id="primTxt">—</b></span>
-      <span class="sc">resultado invariante<br><span class="goal" id="goalTxt">—</span></span>
+      <span class="sc">objetivo de esta tirada<br><span class="goal" id="goalTxt">—</span></span>
     </div>
   </header>
 
@@ -292,7 +292,7 @@
     <label class="switch step on" id="swStep">
       <input type="checkbox" id="chkStep" checked>
       <span class="track-sw"><span class="knob"></span></span>
-      <span class="lab">paso a paso<small>avance manual</small></span>
+      <span class="lab">paso a paso<small id="stepModeTxt">avance manual · activado</small></span>
     </label>
     <span class="navgrp" id="navgrp">
       <button class="nav" id="btnPrev" title="elemento anterior (←)">◀</button>
@@ -339,7 +339,7 @@
 
   <div class="tree-panel">
     <div class="tree-head">
-      <span class="tree-title">Estrategias · rutas distintas hacia el mismo resultado</span>
+      <span class="tree-title">Estrategias · una rama por tirada · las perturbadas se bifurcan</span>
       <span class="tree-sub" id="treeSub">sin rutas todavía</span>
     </div>
     <svg class="treesvg" id="treesvg" viewBox="0 0 520 170" preserveAspectRatio="xMidYMid meet">
@@ -411,14 +411,18 @@ const CONJ={empujar:"empuja",traccionar:"tracciona"};
 const LETTERS="ABCDEFGHIJKLMNOPQR";
 const MESH_N=18;
 
-function newSession(){
-  const k=PKEYS[rnd(0,PKEYS.length-1)];
-  session={key:k,prim:PRIMS[k],goal:rnd(0,2)};
-  session.holds=session.prim.opts[session.goal].hold;
-  session.task=session.prim.opts[session.goal].task;
+function updateSessionUI(){
   primTxt.textContent="«"+session.prim.label+"»"+(session.holds?" + prensión":"");
   goalTxt.textContent="«"+session.task+"»";
 }
+function pickExample(){
+  const prev=session?session.key:null;
+  const pool=PKEYS.filter(k=>k!==prev);
+  const k=pool[rnd(0,pool.length-1)],prim=PRIMS[k],goal=rnd(0,2);
+  session={key:k,prim,goal,holds:prim.opts[goal].hold,task:prim.opts[goal].task};
+  updateSessionUI();
+}
+function newSession(){session=null;pickExample();}
 function jitter(v,d,lo,hi){return Math.max(lo,Math.min(hi,v+rnd(-d,d)));}
 function genPass(){
   const fin=[0,1,2].map(()=>({ang:rnd(12,84),pow:rnd(25,92)}));
@@ -432,7 +436,7 @@ function genPass(){
   };
 }
 function genData(pert){
-  const d={n:iter,pert,prim:session.prim,goal:session.goal,p1:genPass()};
+  const d={n:iter,pert,prim:session.prim,goal:session.goal,ex:session,p1:genPass()};
   if(pert)d.p2=genPass();
   return d;
 }
@@ -797,6 +801,8 @@ function treeStep(d){
   }};
 }
 function buildSteps(d){
+  const SS=d.ex;                       // ejemplo congelado de esta tirada
+  const optNameOf=i=>SS.prim.opts[i].n;
   const S={};   // estado mutable compartido entre pasos
   const steps=[];
   const cellStep=(label,narr,make)=>steps.push({label,narr,dur:DWELL,mount:async ctx=>{
@@ -820,7 +826,7 @@ function buildSteps(d){
         ctx.add(track,w);autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
       }});
     steps.push({label:"aferencia · lenguaje → sujeto",
-      narr:`<span class="vu">catalogado</span> — coincide con la cámara: la tirada se archiva como <b>«${session.task}» · conseguido · confirmado</b>. Este es el lazo lento; aquí solo registra, no reescribe el mapeo.`,
+      narr:`<span class="vu">catalogado</span> — coincide con la cámara: la tirada se archiva como <b>«${SS.task}» · conseguido · confirmado</b>. Este es el lazo lento; aquí solo registra, no reescribe el mapeo.`,
       dur:140,mount:async ctx=>{
         const track=getTrack(),cells=track.querySelectorAll(".cell").length;
         const r=longArc(track,0,cells-1,{color:C.user,top:0,height:56,dur:1300,width:1.9,dash:"5 4",labX:0.26,labTop:0,label:"⟵ lazo lento · post-hoc"});
@@ -829,14 +835,14 @@ function buildSteps(d){
   }
   // ---- segmento in-sample ----
   function inSample(getTrack,pass,P,adapted,servoInit){
-    const M=d.prim, verb=CONJ[session.key];
+    const M=d.prim, verb=CONJ[SS.key];
     if(!adapted){
       cellStep("intención declarada",
-        `<span class="vu">intención</span> — antes de la tirada, el sujeto declara qué quiere hacer: <b>«${session.task}»</b>. Queda registrada y bloqueada; nada de lo que venga después puede reescribirla.`,
+        `<span class="vu">intención</span> — antes de la tirada, el sujeto declara qué quiere hacer: <b>«${SS.task}»</b>. Queda registrada y bloqueada; nada de lo que venga después puede reescribirla.`,
         ()=>({track:getTrack(),node:buildIntent(),cap:"intención declarada",accent:"u"}));
     }else{
       cellStep("intención (sin cambios)",
-        `<span class="vu">intención</span> — <b>no se vuelve a preguntar</b>: el objetivo declarado sigue siendo «${session.task}». Lo que cambia es la ruta, no lo que se quiere.`,
+        `<span class="vu">intención</span> — <b>no se vuelve a preguntar</b>: el objetivo declarado sigue siendo «${SS.task}». Lo que cambia es la ruta, no lo que se quiere.`,
         ()=>({track:getTrack(),node:buildIntent(),cap:"intención · sin cambios",accent:"u"}));
     }
     cellStep(adapted?"malla · re-lectura":"malla",
@@ -854,7 +860,7 @@ function buildSteps(d){
     steps.push({label:"primitiva motora",
       narr:`<span class="vi">primitiva motora</span> — el patrón corresponde a la primitiva de <b>«${M.label}»</b>. La prensión no abre secuencia: si hace falta, encadena después.`,
       dur:DWELL,mount:async ctx=>{
-        const track=getTrack(),svg=buildPrimitive(session.key,false);
+        const track=getTrack(),svg=buildPrimitive(SS.key,false);
         if(track.querySelector(".cell"))ctx.add(track,conn(false));
         const w=wrapCell(svg,"primitiva · "+M.label,'i');ctx.add(track,w);
         S["prim"+P]=svg;autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
@@ -894,7 +900,7 @@ function buildSteps(d){
       },undo:()=>{if(S["prior"+P])renderPrior(S["prior"+P],d,0);}});
 
     steps.push({label:"retro servos → prior",
-      narr:`<span class="vb">retroalimentación</span> — los servos corrigen a <b>${servTxt(pass.servos)}</b> y el prior se estrecha con cada corrección hasta quedar <b>una sola vía: «${optName(d.goal)}»</b> — el brazo se extiende.`,
+      narr:`<span class="vb">retroalimentación</span> — los servos corrigen a <b>${servTxt(pass.servos)}</b> y el prior se estrecha con cada corrección hasta quedar <b>una sola vía: «${optNameOf(d.goal)}»</b> — el brazo se extiende.`,
       dur:160,mount:async ctx=>{
         const track=getTrack();
         const r1=retroArc(track,4,6);if(r1.node)ctx.nodes.push(r1.node);
@@ -909,19 +915,19 @@ function buildSteps(d){
       }});
 
     steps.push({label:"prior encadenado ×N",
-      narr:`<span class="vi">prior encadenado</span> — resuelta esa vía, <b>queda bloqueada como contexto</b> y sobre ella se abre un <b>prior nuevo</b> —${M.sub}— con sus propias opciones. Mientras la intención de «${session.task}» siga viva y la primitiva siga siendo «${M.label}», el ciclo se repite <b>N veces</b>: cada prior resuelto restringe al siguiente, y solo se recorre la combinatoria de <em>esta</em> primitiva. Si el listener reescribiera la primitiva a «${M.otra}», el conjunto de opciones cambiaría entero.`,
+      narr:`<span class="vi">prior encadenado</span> — resuelta esa vía, <b>queda bloqueada como contexto</b> y sobre ella se abre un <b>prior nuevo</b> —${M.sub}— con sus propias opciones. Mientras la intención de «${SS.task}» siga viva y la primitiva siga siendo «${M.label}», el ciclo se repite <b>N veces</b>: cada prior resuelto restringe al siguiente, y solo se recorre la combinatoria de <em>esta</em> primitiva. Si el listener reescribiera la primitiva a «${M.otra}», el conjunto de opciones cambiaría entero.`,
       dur:DWELL,mount:async ctx=>{
         if(S["prior"+P])renderPrior(S["prior"+P],d,3);
         const c=cycleOverlay(getTrack(),4,6,"\u00d7N \u00b7 mientras la intenci\u00f3n siga viva");
         ctx.nodes.push(...c.nodes);await c.done;
       },undo:()=>{if(S["prior"+P])renderPrior(S["prior"+P],d,2);}});
 
-    if(session.holds){
+    if(SS.holds){
       steps.push({label:"prensión encadenada",
         narr:`<span class="vi">prensión</span> — <b>encadena sobre el ${M.label==="empujar"?"alcance":"agarre"}</b>: la vía elegida exige sostener la carga, así que la segunda primitiva se activa sin abrir secuencia propia.`,
         dur:DWELL,mount:async()=>{
-          if(S["prim"+P])renderPrimitive(S["prim"+P],session.key,true);
-        },undo:()=>{if(S["prim"+P])renderPrimitive(S["prim"+P],session.key,false);}});
+          if(S["prim"+P])renderPrimitive(S["prim"+P],SS.key,true);
+        },undo:()=>{if(S["prim"+P])renderPrimitive(S["prim"+P],SS.key,false);}});
     }
   }
   function divider(getTrack){
@@ -941,8 +947,8 @@ function buildSteps(d){
     divider(()=>S.r1.track);
     cellStep("cámaras",`<span class="va">cámaras</span> — el registro externo certifica que el gesto ocurrió <b>en el mundo</b>, no solo en la predicción.`,
       ()=>({track:S.r1.track,node:buildCamera(),cap:"cámaras · registro",accent:"a",opts:{zone:"oos"}}));
-    cellStep("resultado",`<span class="va">resultado</span> — <b>«${session.task}» ✓</b>${session.holds?", con la carga sostenida":""}. Esto es lo único que tiene que mantenerse igual entre días.`,
-      ()=>({track:S.r1.track,node:buildGesture(session.key,session.holds),cap:"resultado ✓",accent:"a",opts:{zone:"oos"}}));
+    cellStep("resultado",`<span class="va">resultado</span> — <b>«${SS.task}» ✓</b>${SS.holds?", con la carga sostenida":""}. Esto es lo único que tiene que mantenerse igual entre días.`,
+      ()=>({track:S.r1.track,node:buildGesture(SS.key,SS.holds),cap:"resultado ✓",accent:"a",opts:{zone:"oos"}}));
     steps.push({label:"aferencia · cámara → sujeto",
       narr:`<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual: lenta, y <b>obliga a mirar</b>.`,
       dur:140,mount:async ctx=>{
@@ -990,8 +996,8 @@ function buildSteps(d){
     cellStep("cámaras",`<span class="va">cámaras</span> — certifican el gesto <b>adaptado</b>: ocurrió, y ocurrió bien.`,
       ()=>({track:S.r2.track,node:buildCamera(),cap:"cámaras · registro",accent:"a",opts:{zone:"oos"}}));
     cellStep("resultado adaptado",
-      `<span class="va">resultado</span> — <b>«${session.task}» ✓</b>: el mismo resultado, alcanzado con otro reclutamiento y otros ángulos.`,
-      ()=>({track:S.r2.track,node:buildGesture(session.key,session.holds),cap:"resultado ✓ · adaptado",accent:"a",opts:{zone:"oos"}}));
+      `<span class="va">resultado</span> — <b>«${SS.task}» ✓</b>: el mismo resultado, alcanzado con otro reclutamiento y otros ángulos.`,
+      ()=>({track:S.r2.track,node:buildGesture(SS.key,SS.holds),cap:"resultado ✓ · adaptado",accent:"a",opts:{zone:"oos"}}));
     steps.push({label:"aferencia · cámara → sujeto",
       narr:`<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual.`,
       dur:140,mount:async ctx=>{
@@ -1146,7 +1152,7 @@ function setMode(on){
 function lock(on){btnNew.disabled=on;btnReset.disabled=on;chk.disabled=on;}
 
 async function finishCurrent(){
-  const prevSpeed=speed;speed=2;
+  const prevSpeed=speed;speed=60;          // efectivamente instantáneo, no una reproducción
   while(cur&&cur.idx<cur.steps.length)await nextStep();
   speed=prevSpeed;
 }
@@ -1154,6 +1160,7 @@ async function stamp(pert){
   if(anim)return;
   if(cur&&cur.idx<cur.steps.length){lock(true);await finishCurrent();lock(false);}
   const h0=ledger.querySelector(".hint");if(h0)h0.remove();
+  pickExample();
   iter++;if(pert)oos++;
   const d=genData(pert);
   const block=div("block"+(pert?" pert":""));
@@ -1188,10 +1195,13 @@ function reset(){
 btnNew.addEventListener("click",()=>stamp(perturb));
 btnReset.addEventListener("click",reset);
 chk.addEventListener("change",e=>setMode(e.target.checked));
-chkStep.addEventListener("change",e=>{
-  stepMode=e.target.checked;
-  swStep.classList.toggle("on",stepMode);
-});
+function setStepMode(on){
+  stepMode=on;
+  chkStep.checked=on;
+  swStep.classList.toggle("on",on);
+  $("#stepModeTxt").textContent=on?"avance manual · activado":"reproducción automática";
+}
+chkStep.addEventListener("change",e=>setStepMode(e.target.checked));
 btnNext.addEventListener("click",nextStep);
 btnPrev.addEventListener("click",prevStep);
 document.addEventListener("keydown",e=>{
@@ -1207,6 +1217,7 @@ spd.addEventListener("input",()=>{
 });
 
 document.documentElement.style.setProperty("--spd",speed);
+setStepMode(chkStep.checked);
 newSession();redrawTree();updateStatus();updateStepUI();
 </script>
 </body>
