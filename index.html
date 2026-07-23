@@ -69,6 +69,14 @@
   button.ghost:hover:not(:disabled){color:var(--ink)}
   button.nav{padding:9px 13px;font-size:14px;line-height:1}
 
+  .intsel{display:inline-flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;background:rgba(255,255,255,.006)}
+  .intsel .isl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+    padding:0 10px 0 12px;white-space:nowrap}
+  .intsel .isb{border:none;border-left:1px solid var(--line-2);border-radius:0;padding:10px 12px;
+    font-size:11.5px;background:transparent;color:var(--soft);gap:0;white-space:nowrap}
+  .intsel .isb:hover:not(:disabled){background:rgba(255,255,255,.03);color:var(--ink)}
+  .intsel .isb.on{background:rgba(242,184,76,.1);color:#e0a94e}
   .switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;
     border:1px solid var(--line);border-radius:8px;padding:9px 13px;transition:.18s;background:rgba(255,255,255,.006)}
   .switch:hover{border-color:#2b3a34}
@@ -189,6 +197,9 @@
     white-space:nowrap;z-index:7;opacity:0;transition:opacity .35s ease;
     background:rgba(7,10,9,.92);padding:2px 6px;border-radius:3px;line-height:1.2}
   .arclab.in{opacity:.9}
+  .domlab{position:absolute;font-size:7px;letter-spacing:.18em;text-transform:uppercase;pointer-events:none;
+    text-align:center;color:var(--faint);z-index:7;opacity:0;transition:opacity .4s ease;line-height:1.2}
+  .domlab.in{opacity:.95}
   .cyclab{position:absolute;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;pointer-events:none;
     white-space:nowrap;z-index:7;opacity:0;transition:opacity .4s ease;color:#a99ad6;
     background:rgba(7,10,9,.92);padding:2px 6px;border-radius:3px;line-height:1.2}
@@ -266,6 +277,18 @@
   table.log .pfx{color:var(--faint);font-size:8.5px;letter-spacing:.1em;margin-right:4px}
   table.log tr.pert .pb .pfx{color:#a85f52}
   table.log{min-width:1060px}
+  table.log th.c-prim,table.log td.c-prim{border-left:2px solid rgba(74,168,242,.45);
+    background:rgba(74,168,242,.05);color:#7fabd0;white-space:nowrap}
+  table.log td.c-prim b{color:var(--blue);font-weight:500}
+  table.log th.c-prim{color:#7fabd0}
+  table.log .stable{display:inline-block;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:#9ec6e8;border:1px solid rgba(74,168,242,.4);border-radius:3px;padding:1px 5px;margin-top:4px}
+  table.log{min-width:1180px}
+  table.log .thumbs{display:flex;gap:3px;margin-top:5px;align-items:center}
+  table.log .thumb{width:27px;height:27px;display:block;border-radius:3px;background:#070A09;
+    border:1px solid var(--line-2);flex-shrink:0}
+  table.log tr.pert .thumbs+.thumbs{margin-top:3px}
+  table.log .tarrow{color:var(--faint);font-size:8px;line-height:1}
   table.log .empty td{color:var(--faint);text-align:center;padding:18px 0;border-bottom:none}
   .note{margin-top:20px;display:flex;align-items:center;gap:10px;font-size:10.5px;letter-spacing:.06em;color:var(--faint);flex-wrap:wrap}
   .note .dot{width:5px;height:5px;border-radius:50%;background:var(--faint)}
@@ -320,6 +343,10 @@
 
   <div class="controls">
     <button class="primary" id="btnNew"><span class="arm"></span><span data-i18n="btnNew"></span></button>
+    <span class="intsel" id="intsel" role="group">
+      <span class="isl" data-i18n="intentLbl"></span>
+      <button class="isb on" data-t="-1" data-i18n="intAny"></button><button class="isb" data-t="0" data-i18n="intPush"></button><button class="isb" data-t="1" data-i18n="intLift"></button><button class="isb" data-t="2" data-i18n="intPull"></button>
+    </span>
     <label class="switch" id="sw">
       <input type="checkbox" id="chkPert">
       <span class="track-sw"><span class="knob"></span></span>
@@ -391,7 +418,7 @@
     <div class="tbl-scroll">
       <table class="log">
         <thead><tr>
-          <th data-i18n="thN"></th><th data-i18n="thWant"></th><th data-i18n="thSens"></th>
+          <th data-i18n="thN"></th><th data-i18n="thWant"></th><th data-i18n="thSens"></th><th class="c-prim" data-i18n="thPrim"></th>
           <th data-i18n="thServ"></th><th data-i18n="thPri"></th><th data-i18n="thGes"></th>
           <th data-i18n="thCam"></th><th data-i18n="thSay"></th><th class="c-res" data-i18n="thRes"></th>
         </tr></thead>
@@ -491,19 +518,61 @@ const TASKS=[
    opts:[B("tracción al cuerpo","pull to the body"),B("arrastre sobre la mesa","drag across the table"),B("tracción sostenida","sustained pull")]}
 ];
 const PKEYS=Object.keys(PRIMS);          // la prensión queda fuera del sorteo inicial
+const GRP=[{es:"pectoral",en:"pectoralis",ab:"PEC"},{es:"deltoides",en:"deltoid",ab:"DEL"},
+           {es:"dorsal",en:"latissimus",ab:"DOR"},{es:"lumbar",en:"lumbar",ab:"LUM"}];
+const MIN_SHARE=6;
+function normMix(m){
+  m=m.map(v=>Math.max(MIN_SHARE,Math.round(v)));
+  const t=m.reduce((a,b)=>a+b,0);
+  m=m.map(v=>Math.round(v/t*100));
+  m[0]+=100-m.reduce((a,b)=>a+b,0);
+  return m;
+}
+/* Secuencia de repartos a lo largo de UN gesto.
+   Ningún grupo se apaga nunca: el lumbar se adelanta (ajuste postural
+   anticipatorio), el motor primario alcanza su meseta y el sinergista
+   va tomando relevo. Cambia el equilibrio, no el conjunto. */
+function genMixSeq(key){
+  const prime=key==="empujar"?0:2, syn=1, ant=3, other=key==="empujar"?2:0;
+  const seq=[];
+  const m0=[0,0,0,0];
+  m0[prime]=rnd(24,30); m0[syn]=rnd(12,17); m0[other]=rnd(8,12); m0[ant]=rnd(20,26);
+  seq.push(normMix(m0));
+  let cur=m0.slice();
+  for(let i=0;i<CYCLES;i++){
+    const n=cur.slice();
+    n[prime]-=rnd(2,6);
+    n[syn]  +=rnd(4,9);
+    n[ant]  -=rnd(2,5);
+    n[other]+=rnd(0,3);
+    seq.push(normMix(n));
+    cur=n;
+  }
+  return seq;
+}
+const mixTxt=(m,l)=>GRP.map((g,i)=>`${g[l]} ${m[i]}%`).join(" · ");
+const mixShort=m=>GRP.map((g,i)=>`${g.ab[0]}${m[i]}`).join(" ");
+const mixShift=(a,b,l)=>{
+  const idx=[0,1,2,3].map(i=>({i,d:b[i]-a[i]})).sort((x,y)=>Math.abs(y.d)-Math.abs(x.d)).slice(0,2);
+  return idx.map(o=>`${GRP[o.i][l]} ${a[o.i]}→${b[o.i]}%`).join(", ");
+};
 const GROUPS=B("pectoral · dorsal · deltoides · lumbar","pectoralis · latissimus · deltoid · lumbar");
-const LETTERS="ABCDEFGHIJKLMNOPQR";
 const CYCLES=2;
-const MESH_N=18;
 
 function updateSessionUI(){
   primTxt.textContent="«"+tx(session.prim.label)+"»"+(session.holds?(LANG==="es"?" + prensión":" + grasp"):"");
   goalTxt.textContent="«"+tx(session.task)+"»";
 }
+let fixedTask=-1;
 function pickExample(){
-  const prev=session?session.tIdx:-1;
-  const pool=TASKS.map((_,i)=>i).filter(i=>i!==prev);
-  const tIdx=pool[rnd(0,pool.length-1)],t=TASKS[tIdx];
+  let tIdx;
+  if(fixedTask>=0)tIdx=fixedTask;
+  else{
+    const prev=session?session.tIdx:-1;
+    const pool=TASKS.map((_,i)=>i).filter(i=>i!==prev);
+    tIdx=pool[rnd(0,pool.length-1)];
+  }
+  const t=TASKS[tIdx];
   session={tIdx,key:t.key,prim:PRIMS[t.key],dir:t.dir,goal:rnd(0,2),holds:t.holds,task:t.task,opts:t.opts};
   updateSessionUI();
 }
@@ -511,15 +580,15 @@ function newSession(){session=null;pickExample();}
 function jitter(v,d,lo,hi){return Math.max(lo,Math.min(hi,v+rnd(-d,d)));}
 function genPass(){
   const fin=[0,1,2].map(()=>({ang:rnd(12,84),pow:rnd(25,92)}));
+  const mix=genMixSeq(session.key);
   const cyc=[];
   for(let i=0;i<CYCLES;i++)cyc.push({
-    sensors:shuffle([...Array(MESH_N).keys()]).slice(0,rnd(3,5)).sort((x,y)=>x-y),
     servos:[0,1,2].map((_,j)=>({ang:jitter(fin[j].ang,10,6,90),pow:jitter(fin[j].pow,12,15,98)})),
     da:[-18,0,18][rnd(0,2)]
   });
   return{
     cycles:cyc,
-    sensors:shuffle([...Array(MESH_N).keys()]).slice(0,rnd(3,5)).sort((x,y)=>x-y),
+    mix,
     coarse:fin.map(s=>({ang:jitter(s.ang,14,6,90),pow:jitter(s.pow,18,15,98)})),
     servos:fin,
     heat:{cx:Math.random()*4,cy:Math.random()*4,sig:1+Math.random()*.5},
@@ -531,29 +600,55 @@ function genData(pert){
   if(pert)d.p2=genPass();
   return d;
 }
-const sensLetters=a=>{
-  const L=a.map(i=>LETTERS[i]);
-  return L.length>1?L.slice(0,-1).join(" · ")+" · "+L[L.length-1]:L[0];
-};
 
 /* ---------- glyphs ---------- */
-function buildMesh(sensors){
-  const s=mini(),cx=32,cy=32,rings=[{r:11,n:6},{r:21,n:11}],pts=[{x:cx,y:cy}];
-  rings.forEach(rg=>{for(let i=0;i<rg.n;i++){const a=(i/rg.n)*Math.PI*2-Math.PI/2;pts.push({x:cx+Math.cos(a)*rg.r,y:cy+Math.sin(a)*rg.r});}});
-  pts.forEach(p=>el("circle",{cx:p.x.toFixed(1),cy:p.y.toFixed(1),r:1,fill:"#1c3a30"},s));
-  const lit=sensors.map(i=>pts[i]),seen=new Set();
-  lit.forEach((p,i)=>{let b=-1,bd=1e9;lit.forEach((q,j)=>{if(i!==j){const d2=(p.x-q.x)**2+(p.y-q.y)**2;if(d2<bd){bd=d2;b=j;}}});
-    if(b>=0){const k=i<b?i+"-"+b:b+"-"+i;if(!seen.has(k)){seen.add(k);
-      el("line",{x1:p.x.toFixed(1),y1:p.y.toFixed(1),x2:lit[b].x.toFixed(1),y2:lit[b].y.toFixed(1),stroke:C.green,"stroke-width":.7,opacity:.5},s);}}});
-  lit.forEach(p=>{const c=el("circle",{cx:p.x.toFixed(1),cy:p.y.toFixed(1),r:2.3,fill:C.green},s);c.style.filter="drop-shadow(0 0 3px "+C.green+")";});
+function buildMesh(mix){
+  const s=mini();
+  const mx=Math.max(...mix);
+  GRP.forEach((g,i)=>{
+    const col=i%2,row=(i/2)|0,zx=3+col*30,zy=4+row*19;
+    const sh=mix[i],k=sh/mx;
+    const lb=el("text",{x:zx+1,y:zy+4,fill:"#3f5a50","font-size":3.6,"font-family":FONT,"letter-spacing":".3"},s);
+    lb.textContent=g.ab;
+    const pc=el("text",{x:zx+26,y:zy+4,fill:"#4d7365","font-size":3.8,"font-family":FONT,"text-anchor":"end"},s);
+    pc.textContent=sh+"%";
+    for(let r=0;r<2;r++)for(let c=0;c<3;c++){
+      const cx=zx+8+c*7,cy=zy+8+r*6.5;
+      const jit=(Math.sin(i*7+r*3+c)*0.5+0.5)*0.22;      // textura, no ruido real
+      const o=Math.max(.14,Math.min(1,k*(0.82+jit)));
+      const d=el("circle",{cx:cx.toFixed(1),cy:cy.toFixed(1),r:(1.3+k*1.1).toFixed(2),
+        fill:C.green,opacity:o.toFixed(2)},s);
+      if(k>.85)d.style.filter="drop-shadow(0 0 2px "+C.green+")";
+    }
+  });
+  // barra de reparto: la suma siempre es el gesto completo
+  let x=4;const W=56;
+  mix.forEach((v,i)=>{
+    const w=W*v/100;
+    el("rect",{x:x.toFixed(1),y:45,width:Math.max(.8,w-.7).toFixed(1),height:3.4,rx:1,
+      fill:C.green,opacity:(.3+.7*(v/mx)).toFixed(2)},s);
+    x+=w;
+  });
+  const u=el("text",{x:32,y:58,fill:"#4d7365","font-size":5.2,"font-family":FONT,"text-anchor":"middle",
+    textLength:36,lengthAdjust:"spacingAndGlyphs"},s);
+  u.textContent="\u00b5V \u00b7 crudo";
   return s;
 }
 function buildHeat(h){
-  const s=mini(),N=5,cell=11,m=(64-N*cell)/2;
+  const s=mini(),N=5,cell=8.4,m=2.5;
   for(let r=0;r<N;r++)for(let c=0;c<N;c++){
     const v=Math.exp(-(((c-h.cx)**2+(r-h.cy)**2)/(2*h.sig*h.sig))),a=Math.max(.05,Math.min(1,v));
-    el("rect",{x:(m+c*cell+1).toFixed(1),y:(m+r*cell+1).toFixed(1),width:cell-2,height:cell-2,rx:2,fill:"rgba(74,168,242,"+a.toFixed(3)+")"},s);
+    el("rect",{x:(m+c*cell+.8).toFixed(1),y:(m+r*cell+.8).toFixed(1),width:cell-1.6,height:cell-1.6,rx:1.6,
+      fill:"rgba(74,168,242,"+a.toFixed(3)+")"},s);
   }
+  // onda limpia con las marcas de latencia · meseta · pico
+  el("path",{d:"M 3 55 L 14 55 L 19 49 L 33 49 L 39 45 L 44 49 L 50 55 L 61 55",
+    fill:"none",stroke:C.blue,"stroke-width":1.1,opacity:.85,"stroke-linejoin":"round","stroke-linecap":"round"},s);
+  [14,26,39].forEach(x=>el("line",{x1:x,y1:42,x2:x,y2:57,stroke:C.blue,"stroke-width":.6,opacity:.4,
+    "stroke-dasharray":"1.5 1.5"},s));
+  const t=el("text",{x:32,y:62.5,fill:"#5d87ab","font-size":4.4,"font-family":FONT,"text-anchor":"middle",
+    textLength:58,lengthAdjust:"spacingAndGlyphs"},s);
+  t.textContent="latencia \u00b7 meseta \u00b7 pico";
   return s;
 }
 // vocabulario motor: primitivas principales arriba, prensión encadenada abajo
@@ -588,7 +683,7 @@ function renderPrimitive(svg,activeKey,chained){
 function buildPrimitive(activeKey,chained){const s=mini();renderPrimitive(s,activeKey,chained);return s;}
 /* prior biomecánico: abanico de gestos admisibles bajo la primitiva.
    stage 0 = abierto · 1 = afinado por el listener · 2 = convergido por los servos */
-function renderPrior(svg,d,stage,chain){
+function renderPrior(svg,d,stage,chain,drop){
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   const px=13,py=52,len=40,ang=[-72,-46,-20];
   if(stage===3){
@@ -621,7 +716,7 @@ function renderPrior(svg,d,stage,chain){
     return svg;
   }
   let live=[0,1,2];
-  if(stage===1)live=[0,1,2].filter(i=>i!==d.drop);
+  if(stage===1)live=[0,1,2].filter(i=>i!==drop);
   if(stage===2)live=[d.goal];
   // sector admisible
   if(live.length>1){
@@ -642,6 +737,23 @@ function renderPrior(svg,d,stage,chain){
   const t=el("text",{x:px+2,y:60,fill:"#6b62a0","font-size":6.5,"font-family":FONT},svg);
   t.textContent=stage===2?"1 vía":live.length+" vías";
   return svg;
+}
+function stripText(svg){
+  try{[...svg.querySelectorAll("text")].forEach(t=>t.remove());}catch(e){}
+  return svg;
+}
+function thumbOf(svg){svg.setAttribute("class","thumb");return stripText(svg);}
+function buildServoGlyph(v){
+  const s=mini();
+  v.forEach((sv,i)=>{
+    const y=15+i*17;
+    el("rect",{x:7,y:y-3.4,width:50,height:6.8,rx:3.4,fill:"#131b22"},s);
+    el("rect",{x:7,y:y-3.4,width:Math.max(3,50*sv.ang/90).toFixed(1),height:6.8,rx:3.4,fill:C.blue,opacity:.9},s);
+  });
+  return s;
+}
+function buildPriorThumb(d,chain){
+  const s=mini();renderPrior(s,d,3,chain);return s;
 }
 function buildPrior(d,stage){const s=mini();renderPrior(s,d,stage);return s;}
 function buildListener(alarm){
@@ -843,6 +955,33 @@ function longArc(track,toIdx,fromIdx,opts){
   }
   return{nodes:[svg,lab],done};
 }
+// corchete de dominio: agrupa un tramo de la cadena bajo un nombre técnico
+function domainBracket(track,fromIdx,toIdx,label){
+  const cells=[...track.querySelectorAll(".cell")],a=cells[fromIdx],b=cells[toIdx];
+  if(!a||!b)return{nodes:[],done:Promise.resolve()};
+  const x0=a.offsetLeft-3,x1=b.offsetLeft+b.offsetWidth+3,w=x1-x0;
+  let yb=0;for(let i=fromIdx;i<=toIdx;i++){const c=cells[i];if(c)yb=Math.max(yb,c.offsetTop+c.offsetHeight);}
+  const H=11;
+  const svg=el("svg",{class:"retro",viewBox:`0 0 ${w} ${H}`});
+  svg.style.left=x0+"px";svg.style.top=(yb+2)+"px";svg.style.width=w+"px";svg.style.height=H+"px";
+  const br=el("path",{d:`M 1 1 V 7 H ${w-1} V 1`,fill:"none",stroke:"#55665e","stroke-width":1,
+    opacity:.8,"stroke-linejoin":"round","stroke-linecap":"round"},svg);
+  track.appendChild(svg);
+  const lab=reg(div("domlab"),label);
+  lab.style.left=x0+"px";lab.style.width=w+"px";lab.style.top=(yb+14)+"px";
+  track.appendChild(lab);
+  let done;
+  if(reduce)done=Promise.resolve();
+  else{
+    const L=br.getTotalLength();
+    br.style.strokeDasharray=L+"px";br.style.strokeDashoffset=L+"px";br.getBoundingClientRect();
+    br.style.transition=`stroke-dashoffset ${(.6/speed).toFixed(2)}s ease`;
+    requestAnimationFrame(()=>br.style.strokeDashoffset="0px");
+    done=wait(620);
+  }
+  requestAnimationFrame(()=>lab.classList.add("in"));
+  return{nodes:[svg,lab],done};
+}
 // anotación de ciclo: el tramo prior -> servos -> listener se repite N veces
 function cycleOverlay(track,fromIdx,toIdx,label){
   const cells=[...track.querySelectorAll(".cell")],a=cells[fromIdx],b=cells[toIdx];
@@ -852,8 +991,8 @@ function cycleOverlay(track,fromIdx,toIdx,label){
   const H=30;
   const svg=el("svg",{class:"retro",viewBox:`0 0 ${w} ${H}`});
   svg.style.left=x0+"px";svg.style.top=(yb+3)+"px";svg.style.width=w+"px";svg.style.height=H+"px";
-  const br=el("path",{d:`M 2 1 V 9 H ${w-2} V 1`,fill:"none",stroke:C.violet,"stroke-width":1.1,opacity:.5,
-    "stroke-linejoin":"round"},svg);
+  const br=el("path",{d:`M 2 5 H ${w-2}`,fill:"none",stroke:C.violet,"stroke-width":1.1,opacity:.45,
+    "stroke-dasharray":"3 3","stroke-linecap":"round"},svg);
   const cx=w/2,cy=19,r=6.4;
   const p=(deg)=>[cx+Math.cos(deg*Math.PI/180)*r,cy+Math.sin(deg*Math.PI/180)*r];
   const s0=p(-58),s1=p(200);
@@ -972,13 +1111,13 @@ function buildSteps(d){
     steps.push({label:mk(l=>adapted?(ES(l)?"malla · re-lectura":"mesh · re-read"):(ES(l)?"malla":"mesh")),
       narr:mk(l=>adapted
         ? (ES(l)
-          ? `<span class="vg">malla</span> — tras el cambio, el reclutamiento se desplaza dentro de los mismos cuatro grupos: ahora responden los sensores <b>${sensLetters(pass.sensors)}</b>. Compensa el <b>${MU2("es")}</b>; la señal sigue siendo utilizable.`
-          : `<span class="vg">mesh</span> — after the change, recruitment shifts within the same four groups: sensors <b>${sensLetters(pass.sensors)}</b> now respond. The <b>${MU2("en")}</b> compensates; the signal is still usable.`)
+          ? `<span class="vg">malla</span> — tras el cambio, el reclutamiento se desplaza dentro de los mismos cuatro grupos: el reparto se reorganiza a <b>${mixTxt(pass.mix[0],"es")}</b>. Compensa el <b>${MU2("es")}</b> sin que ningún grupo se apague; la señal sigue siendo utilizable.`
+          : `<span class="vg">mesh</span> — after the change, recruitment shifts within the same four groups: the balance reorganises to <b>${mixTxt(pass.mix[0],"en")}</b>. The <b>${MU2("en")}</b> compensates without any group switching off; the signal is still usable.`)
         : (ES(l)
-          ? `<span class="vg">malla</span> — el usuario contrae el <b>${MU("es")}</b>. De los cuatro grupos que la malla cubre —${GR("es")}— responden los sensores <b>${sensLetters(pass.sensors)}</b>: reclutamiento coherente, <b>señal robusta</b>. Nada distal se mide aquí.`
-          : `<span class="vg">mesh</span> — the user contracts the <b>${MU("en")}</b>. Of the four groups the mesh covers —${GR("en")}— sensors <b>${sensLetters(pass.sensors)}</b> respond: coherent recruitment, <b>robust signal</b>. Nothing distal is measured here.`)),
+          ? `<span class="vg">malla</span> — el usuario contrae el <b>${MU("es")}</b>. De los cuatro grupos que la malla cubre —${GR("es")}— <b>los cuatro están activos a la vez</b>; lo que la malla lee es el <b>reparto</b>: ${mixTxt(pass.mix[0],"es")}. El lumbar va por delante —ajuste postural anticipatorio— antes de que el motor primario alcance su meseta. Es <b>registro crudo, en microvoltios</b>: sucio, con deriva y <b>no estacionario entre sesiones</b>. Nada distal se mide aquí.`
+          : `<span class="vg">mesh</span> — the user contracts the <b>${MU("en")}</b>. Of the four groups the mesh covers —${GR("en")}— <b>all four are active at once</b>; what the mesh reads is the <b>balance</b>: ${mixTxt(pass.mix[0],"en")}. The lumbar leads —anticipatory postural adjustment— before the prime mover reaches its plateau. This is <b>raw recording, in microvolts</b>: dirty, drifting and <b>non-stationary across sessions</b>. Nothing distal is measured here.`)),
       dur:DWELL,mount:async ctx=>{
-        const track=getTrack(),svg=buildMesh(pass.sensors);
+        const track=getTrack(),svg=buildMesh(pass.mix[0]);
         ctx.add(track,conn(false));
         const w=wrapCell(svg,mk(l=>adapted?(ES(l)?"①′ malla adaptada":"①′ adapted mesh"):(ES(l)?"① malla":"① mesh")),'g');
         ctx.add(track,w);S["mesh"+P]=svg;autoscroll();requestAnimationFrame(()=>w.classList.add("in"));
@@ -986,12 +1125,17 @@ function buildSteps(d){
 
     cellStep(mk(l=>adapted?(ES(l)?"activación adaptada":"adapted activation"):(ES(l)?"activación":"activation")),
       mk(l=>adapted
-        ? (ES(l)?`<span class="vb">activación</span> — el patrón espacial se reorganiza sobre el nuevo reclutamiento y vuelve a estabilizarse.`
-                :`<span class="vb">activation</span> — the spatial pattern reorganises over the new recruitment and settles again.`)
-        : (ES(l)?`<span class="vb">activación</span> — el patrón espacial se estabiliza sobre el vientre muscular. Relación señal-ruido suficiente para clasificar sin ambigüedad.`
-                :`<span class="vb">activation</span> — the spatial pattern settles over the muscle belly. Signal-to-noise is enough to classify unambiguously.`)),
+        ? (ES(l)?`<span class="vb">activación</span> — las mismas variables se re-extraen sobre el nuevo reclutamiento: latencia, meseta y pico vuelven a caer en rango pese a que la señal cruda es otra.`
+                :`<span class="vb">activation</span> — the same variables are re-extracted over the new recruitment: latency, plateau and peak fall back in range even though the raw signal is a different one.`)
+        : (ES(l)?`<span class="vb">activación</span> — del registro crudo se extraen las variables que alimentan la primitiva: <b>orden de reclutamiento, latencia de inicio, meseta, pico, envolvente y relación señal-ruido</b>. Que esas variables sobrevivan entre sesiones es el problema del que depende todo lo demás.`
+                :`<span class="vb">activation</span> — from the raw recording, the variables that feed the primitive are extracted: <b>recruitment order, onset latency, plateau, peak, envelope and signal-to-noise ratio</b>. Whether those variables survive across sessions is the problem everything else depends on.`)),
       ()=>({track:getTrack(),node:buildHeat(pass.heat),
         cap:mk(l=>adapted?(ES(l)?"②′ activación adaptada":"②′ adapted activation"):(ES(l)?"② activación":"② activation")),accent:"b"}));
+    steps.push({label:mk(l=>ES(l)?"dominio · procesado de señal":"domain · signal processing"),
+      narr:null,dur:120,mount:async ctx=>{
+        const r=domainBracket(getTrack(),1,2,mk(l=>ES(l)?"procesado de señal":"signal processing"));
+        ctx.nodes.push(...r.nodes);await r.done;
+      }});
 
     steps.push({label:mk(l=>ES(l)?"primitiva motora":"motor primitive"),
       narr:mk(l=>ES(l)
@@ -1041,7 +1185,7 @@ function buildSteps(d){
         const track=getTrack();
         const{node,done}=ringOverlay(track,1,5,C.silver,false);
         if(node)ctx.nodes.push(node);
-        setTimeout(()=>{if(S["prior"+P])renderPrior(S["prior"+P],d,1);},reduce?0:T(420));
+        setTimeout(()=>{if(S["prior"+P])renderPrior(S["prior"+P],d,1,null,pass.drop);},reduce?0:T(420));
         await done;
       },undo:()=>{if(S["prior"+P])renderPrior(S["prior"+P],d,0);}});
 
@@ -1058,7 +1202,7 @@ function buildSteps(d){
         setTimeout(()=>{if(S["prior"+P])renderPrior(S["prior"+P],d,2);},reduce?0:T(320));
         await r2.done;
       },undo:()=>{
-        if(S["prior"+P])renderPrior(S["prior"+P],d,1);
+        if(S["prior"+P])renderPrior(S["prior"+P],d,1,null,pass.drop);
         if(S["servo"+P])setServos(S["servo"+P],pass.coarse);
       }});
 
@@ -1069,18 +1213,18 @@ function buildSteps(d){
       steps.push({label:mk(l=>(ES(l)?"red generadora · ciclo ":"generative network · cycle ")+(ci+1)+"/"+CYCLES),
         narr:mk(l=>ci===0
           ? (ES(l)
-            ? `<span class="vi">red generadora · ciclo 1</span> — <b>la malla se relee</b>: ahora responden <b>${sensLetters(cy.sensors)}</b>. El reclutamiento se ha desplazado <em>dentro del propio gesto</em> y la primitiva <b>sigue siendo «${PL("es")}»</b>. Con la vía anterior bloqueada como contexto se abre un prior nuevo —${SB("es")}—, se resuelve, y los servos corrigen a <b>${sv(cy.servos)}</b>. <b>Este desenrollado es la red generadora</b>: el prior dice qué es admisible, la red decide cuál se despliega ahora dado lo ya bloqueado.`
-            : `<span class="vi">generative network · cycle 1</span> — <b>the mesh is re-read</b>: <b>${sensLetters(cy.sensors)}</b> now respond. Recruitment has shifted <em>within the gesture itself</em> and the primitive is <b>still "${PL("en")}"</b>. With the previous route locked as context, a new prior opens —${SB("en")}—, resolves, and the servos correct to <b>${sv(cy.servos)}</b>. <b>This unrolling is the generative network</b>: the prior says what is admissible, the network decides which one unfolds now given what is already locked.`)
+            ? `<span class="vi">red generadora · ciclo 1</span> — <b>la malla se relee</b>: el reparto se desplaza —${mixShift(pass.mix[ci],pass.mix[ci+1],"es")}—. <b>Ninguno se apaga</b>: cambia el equilibrio, no el conjunto, y la primitiva <b>sigue siendo «${PL("es")}»</b>. Con la vía anterior bloqueada como contexto se abre un prior nuevo —${SB("es")}—, se resuelve, y los servos corrigen a <b>${sv(cy.servos)}</b>. <b>Este desenrollado es la red generadora</b>: el prior dice qué es admisible, la red decide cuál se despliega ahora dado lo ya bloqueado.`
+            : `<span class="vi">generative network · cycle 1</span> — <b>the mesh is re-read</b>: the balance shifts —${mixShift(pass.mix[ci],pass.mix[ci+1],"en")}—. <b>Nothing switches off</b>: the balance changes, not the set, and the primitive is <b>still "${PL("en")}"</b>. With the previous route locked as context, a new prior opens —${SB("en")}—, resolves, and the servos correct to <b>${sv(cy.servos)}</b>. <b>This unrolling is the generative network</b>: the prior says what is admissible, the network decides which one unfolds now given what is already locked.`)
           : (ES(l)
-            ? `<span class="vi">red generadora · ciclo ${ci+1}</span> — nueva relectura: <b>${sensLetters(cy.sensors)}</b>. Otra constelación distinta, misma primitiva. Se encadena el eslabón <b>${ci+1}</b> sobre los anteriores y los servos vuelven a corregir a <b>${sv(cy.servos)}</b>. Si en alguna de estas relecturas el listener viera dispararse el <b>${MUO("es")}</b> con fuerza, <b>reescribiría la primitiva</b> a «${OT("es")}» y el conjunto de opciones cambiaría entero.`
-            : `<span class="vi">generative network · cycle ${ci+1}</span> — a fresh re-read: <b>${sensLetters(cy.sensors)}</b>. A different constellation, the same primitive. Link <b>${ci+1}</b> chains onto the previous ones and the servos correct again to <b>${sv(cy.servos)}</b>. If in any of these re-reads the listener saw the <b>${MUO("en")}</b> fire hard, it would <b>rewrite the primitive</b> to "${OT("en")}" and the whole option set would change.`)),
+            ? `<span class="vi">red generadora · ciclo ${ci+1}</span> — nueva relectura: ${mixShift(pass.mix[ci],pass.mix[ci+1],"es")}. La sinergia se despliega más, misma primitiva. Se encadena el eslabón <b>${ci+1}</b> sobre los anteriores y los servos vuelven a corregir a <b>${sv(cy.servos)}</b>. El <b>${MUO("es")}</b> nunca está en cero, así que no basta con que aparezca: solo si <b>arrancara primero y con pico alto</b> —orden y latencia, no mera presencia— el listener <b>reescribiría la primitiva</b> a «${OT("es")}» y el conjunto de opciones cambiaría entero.`
+            : `<span class="vi">generative network · cycle ${ci+1}</span> — a fresh re-read: ${mixShift(pass.mix[ci],pass.mix[ci+1],"en")}. The synergy unfolds further, the same primitive. Link <b>${ci+1}</b> chains onto the previous ones and the servos correct again to <b>${sv(cy.servos)}</b>. The <b>${MUO("en")}</b> is never at zero, so its mere presence proves nothing: only if it <b>led the onset with a high peak</b> —order and latency, not presence— would the listener <b>rewrite the primitive</b> to "${OT("en")}" and the whole option set would change.`)),
         dur:200,mount:async ctx=>{
           const track=getTrack();
           if(ci===0){
             const c=cycleOverlay(track,4,6,mk(l=>ES(l)?"red generadora ×N · mientras la intención siga viva":"generative network ×N · while the intention holds"));
             ctx.nodes.push(...c.nodes);
           }
-          if(S["mesh"+P]){const nm=buildMesh(cy.sensors);S["mesh"+P].replaceWith(nm);S["mesh"+P]=nm;}
+          if(S["mesh"+P]){const nm=buildMesh(pass.mix[ci+1]);S["mesh"+P].replaceWith(nm);S["mesh"+P]=nm;}
           flashCell(track,1,C.green);flashCell(track,6,C.silver);
           await wait(320);
           if(S["prior"+P])renderPrior(S["prior"+P],d,3,chainBase.concat([{open:true}]));
@@ -1091,7 +1235,7 @@ function buildSteps(d){
           await r.done;
         },
         undo:()=>{
-          if(S["mesh"+P]){const om=buildMesh(ci===0?pass.sensors:pass.cycles[ci-1].sensors);S["mesh"+P].replaceWith(om);S["mesh"+P]=om;}
+          if(S["mesh"+P]){const om=buildMesh(pass.mix[ci]);S["mesh"+P].replaceWith(om);S["mesh"+P]=om;}
           if(S["prior"+P])renderPrior(S["prior"+P],d,ci===0?2:3,ci===0?null:pass.cycles.slice(0,ci).map(c=>({open:false,da:c.da})));
           if(S["servo"+P])setServos(S["servo"+P],ci===0?pass.servos:pass.cycles[ci-1].servos);
         }});
@@ -1136,16 +1280,16 @@ function buildSteps(d){
         ? `<span class="va">resultado</span> — <b>«${TK("es")}» ✓</b>${SS.holds?", con la carga sostenida":""}. Esto es lo único que tiene que mantenerse igual entre días.`
         : `<span class="va">outcome</span> — <b>"${TK("en")}" ✓</b>${SS.holds?", with the load held":""}. This is the only thing that has to stay the same across days.`),
       ()=>({track:S.r1.track,node:buildGesture(SS.dir,SS.holds),cap:mk(l=>ES(l)?"resultado ✓":"outcome ✓"),accent:"a",opts:{zone:"oos"}}));
+    langTail(()=>S.r1.track,false);
     steps.push({label:mk(l=>ES(l)?"aferencia · cámara → sujeto":"afference · camera → subject"),
       narr:mk(l=>ES(l)
-        ? `<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual: lenta, y <b>obliga a mirar</b>.`
-        : `<span class="va">camera afference</span> — the outcome returns to the subject visually: slow, and it <b>forces them to look</b>.`),
+        ? `<span class="va">aferencia de la cámara</span> — <b>solo ahora</b>, ya recogida su respuesta, se le muestra el registro. La vía visual es lenta y <b>obliga a mirar</b>: por eso llega la última y no puede contaminar lo que dijo.`
+        : `<span class="va">camera afference</span> — <b>only now</b>, with the answer already recorded, is the footage shown. The visual route is slow and <b>forces them to look</b>: that is why it comes last and cannot contaminate what they said.`),
       dur:140,mount:async ctx=>{
         const r=longArc(S.r1.track,0,8,{color:C.amber,top:16,height:40,dur:1000,width:1.4,marker:"url(#retAm)",
           labX:0.60,labTop:20,label:mk(l=>ES(l)?"⟵ aferencia visual · s":"⟵ visual afference · s")});
         ctx.nodes.push(...r.nodes);await r.done;
       }});
-    langTail(()=>S.r1.track,false);
     steps.push({label:mk(l=>ES(l)?"cierre del lazo":"loop closed"),
       narr:mk(l=>ES(l)?`<b>cadena cerrada ✓</b> — la ruta fue nueva; el resultado, el mismo de siempre.`
                       :`<b>chain closed ✓</b> — the route was new; the outcome, the same as always.`),
@@ -1200,15 +1344,15 @@ function buildSteps(d){
         ? `<span class="va">resultado</span> — <b>«${TK("es")}» ✓</b>: el mismo resultado, alcanzado con otro reclutamiento y otros ángulos.`
         : `<span class="va">outcome</span> — <b>"${TK("en")}" ✓</b>: the same outcome, reached with different recruitment and different angles.`),
       ()=>({track:S.r2.track,node:buildGesture(SS.dir,SS.holds),cap:mk(l=>ES(l)?"resultado ✓ · adaptado":"outcome ✓ · adapted"),accent:"a",opts:{zone:"oos"}}));
+    langTail(()=>S.r2.track,true);
     steps.push({label:mk(l=>ES(l)?"aferencia · cámara → sujeto":"afference · camera → subject"),
-      narr:mk(l=>ES(l)?`<span class="va">aferencia de la cámara</span> — el resultado vuelve al sujeto por vía visual.`
-                      :`<span class="va">camera afference</span> — the outcome returns to the subject visually.`),
+      narr:mk(l=>ES(l)?`<span class="va">aferencia de la cámara</span> — <b>solo ahora</b> se le muestra el registro, con su respuesta ya recogida. Si menciona por su cuenta la perturbación, se anota como comentario espontáneo.`
+                      :`<span class="va">camera afference</span> — <b>only now</b> is the footage shown, with the answer already recorded. If the subject brings up the perturbation unprompted, it is logged as a spontaneous remark.`),
       dur:140,mount:async ctx=>{
         const r=longArc(S.r2.track,0,8,{color:C.amber,top:16,height:40,dur:1000,width:1.4,marker:"url(#retAm)",
           labX:0.60,labTop:20,label:mk(l=>ES(l)?"⟵ aferencia visual · s":"⟵ visual afference · s")});
         ctx.nodes.push(...r.nodes);await r.done;
       }});
-    langTail(()=>S.r2.track,true);
     steps.push({label:mk(l=>ES(l)?"cierre del lazo":"loop closed"),
       narr:mk(l=>ES(l)?`<b>cadena cerrada con re-ruteo ✓</b> — la ruta cambió por completo; el resultado, no.`
                       :`<b>chain closed with a re-route ✓</b> — the route changed completely; the outcome did not.`),
@@ -1371,9 +1515,14 @@ const D={
               "— click a row to re-read it · drag the bottom edge to resize —"),
   treeTitle:B("Estrategias · una rama por tirada · las perturbadas se bifurcan",
               "Strategies · one branch per trial · perturbed ones fork"),
+  intentLbl:B("intención","intention"),
+  intAny:B("aleatoria","random"), intPush:B("empujar","push"),
+  intLift:B("levantar","lift"), intPull:B("traccionar","pull"),
   tblTitle:B("La tabla · una fila por tirada","The table · one row per trial"),
   thN:B("tirada","trial"), thWant:B("el usuario quiere","the user wants"),
-  thSens:B("sensores","sensors"), thServ:B("servos","servos"), thPri:B("priores","priors"),
+  thSens:B("reparto (inicio → fin)","balance (start → end)"),
+  thPrim:B("primitiva · dentro del lazo","primitive · in-loop"), stable:B("estable","stable"),
+  thServ:B("servos","servos"), thPri:B("priores","priors"),
   thGes:B("gesto","gesture"), thCam:B("la cámara dice","the camera says"),
   thSay:B("el usuario dice","the user says"), thRes:B("resultado","outcome"),
   tblEmpty:B("— sin tiradas todavía —","— no trials yet —"),
@@ -1417,7 +1566,7 @@ const logRows=[];
 function emptyTable(){
   logBody.innerHTML="";
   const tr=document.createElement("tr");tr.className="empty";
-  const td=document.createElement("td");td.setAttribute("colspan","9");
+  const td=document.createElement("td");td.setAttribute("colspan","10");
   tr.appendChild(reg(td,()=>tx(D.tblEmpty)));logBody.appendChild(tr);
 }
 function addLogRow(d){
@@ -1427,22 +1576,49 @@ function addLogRow(d){
   const priT=p=>`−«${d.ex.opts[p.drop][LANG]}» → «${d.ex.opts[d.goal][LANG]}» +${CYCLES}`;
   const dual=(f1,f2)=>()=>`<span class="pa"><span class="pfx">a</span>${f1()}</span><br>`+
                           `<span class="pb"><span class="pfx">b</span>${f2()}</span>`;
+  const chainOf=p=>p.cycles.map(c=>({open:false,da:c.da}));
+  // la tira, en pequeño: los cuadrados que de verdad cambian
+  const strip=(...nodes)=>{
+    const w=div("thumbs");
+    nodes.forEach((n,i)=>{
+      if(n==="→"){const a=div("tarrow");a.textContent="→";w.appendChild(a);}
+      else w.appendChild(thumbOf(n));
+    });
+    return w;
+  };
   const tr=document.createElement("tr");
   if(P)tr.className="pert";
   const cells=[
-    ["c-n",()=>"#"+String(d.n).padStart(2,"0")+(P?(LANG==="es"?" · perturbada":" · perturbed"):""),false],
-    ["c-want",()=>"«"+d.ex.task[LANG]+"»",false],
-    ["c-sens",P?dual(()=>sensLetters(p1.sensors),()=>sensLetters(p2.sensors)):()=>sensLetters(p1.sensors),P],
-    ["c-serv",P?dual(()=>servT(p1),()=>servT(p2)):()=>servT(p1),P],
-    ["c-pri",P?dual(()=>priT(p1),()=>priT(p2)):()=>priT(p1),P],
-    ["c-ges",()=>"«"+d.ex.task[LANG]+"» ✓",false],
-    ["c-cam",()=>tx(D.camOK),false],
-    ["c-say",()=>tx(D.sayOK),false],
-    ["c-res",()=>"✓",false]
+    ["c-n",()=>"#"+String(d.n).padStart(2,"0")+(P?(LANG==="es"?" · perturbada":" · perturbed"):""),false,null],
+    ["c-want",()=>"«"+d.ex.task[LANG]+"»",false,null],
+    ["c-sens",P?dual(()=>mixShort(p1.mix[0])+" → "+mixShort(p1.mix[CYCLES]),
+                     ()=>mixShort(p2.mix[0])+" → "+mixShort(p2.mix[CYCLES]))
+              :()=>mixShort(p1.mix[0])+" → "+mixShort(p1.mix[CYCLES]),P,
+     ()=>P?[strip(buildMesh(p1.mix[0]),"→",buildMesh(p1.mix[CYCLES])),
+            strip(buildMesh(p2.mix[0]),"→",buildMesh(p2.mix[CYCLES]))]
+          :[strip(buildMesh(p1.mix[0]),"→",buildMesh(p1.mix[CYCLES]))]],
+    ["c-prim",()=>`<b>«${d.ex.prim.label[LANG]}»</b><br><span class="stable">${tx(D.stable)}</span>`,true,
+     ()=>P?[strip(buildHeat(p1.heat),buildHeat(p2.heat))]
+          :[strip(buildHeat(p1.heat))]],
+    ["c-serv",P?dual(()=>servT(p1),()=>servT(p2)):()=>servT(p1),P,
+     ()=>P?[strip(buildServoGlyph(p1.servos)),strip(buildServoGlyph(p2.servos))]
+          :[strip(buildServoGlyph(p1.servos))]],
+    ["c-pri",P?dual(()=>priT(p1),()=>priT(p2)):()=>priT(p1),P,
+     ()=>P?[strip(buildPriorThumb(d,chainOf(p1))),strip(buildPriorThumb(d,chainOf(p2)))]
+          :[strip(buildPriorThumb(d,chainOf(p1)))]],
+    ["c-ges",()=>"«"+d.ex.task[LANG]+"» ✓",false,
+     ()=>[strip(buildGesture(d.ex.dir,d.ex.holds))]],
+    ["c-cam",()=>tx(D.camOK),false,null],
+    ["c-say",()=>tx(D.sayOK),false,null],
+    ["c-res",()=>"✓",false,null]
   ];
-  cells.forEach(([cls,f,html])=>{
+  cells.forEach(([cls,f,html,thumbs])=>{
     const td=document.createElement("td");td.className=cls;
-    tr.appendChild(html?regHTML(td,f):reg(td,f));
+    const txtSpan=document.createElement("span");
+    if(html)regHTML(txtSpan,f);else reg(txtSpan,f);
+    td.appendChild(txtSpan);
+    if(thumbs)thumbs().forEach(t=>td.appendChild(t));
+    tr.appendChild(td);
   });
   logBody.appendChild(tr);
   logRows.push(tr);
@@ -1539,6 +1715,12 @@ document.addEventListener("keydown",e=>{
   if(e.target.tagName==="INPUT")return;
   if(e.key==="ArrowRight"){e.preventDefault();nextStep();}
   if(e.key==="ArrowLeft"){e.preventDefault();prevStep();}
+});
+document.querySelectorAll(".intsel .isb").forEach(b=>{
+  b.addEventListener("click",()=>{
+    fixedTask=parseInt(b.dataset.t,10);
+    document.querySelectorAll(".intsel .isb").forEach(o=>o.classList.toggle("on",o===b));
+  });
 });
 $("#langEs").addEventListener("click",()=>setLang("es"));
 $("#langEn").addEventListener("click",()=>setLang("en"));
